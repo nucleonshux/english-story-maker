@@ -928,6 +928,11 @@ function drawIntro(ctx,t){
   drawSparkle(ctx,196,1120,18,'rgba(255,255,255,0.75)');
   drawSparkle(ctx,900,1080,24,'rgba(255,255,255,0.8)');
   fillText(ctx,SETTINGS.introTitle||"What's this?",540,830,FONT(132),'#FFFFFF',18);
+  /* 单词图在片头显示 */
+  if(wordImgLoaded&&wordImg){
+    var iw=700,ih=700;
+    ctx.drawImage(wordImg,540-iw/2,1150-iw/2,iw,ih);
+  }
 }
 function drawOutro(ctx,TL){
   fillText(ctx,'The End',540,790,FONT(112),'#FFFFFF',14);
