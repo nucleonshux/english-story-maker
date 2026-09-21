@@ -1302,6 +1302,19 @@ function syncLlmUI(){
   lk.value=SETTINGS.keys[p]||'';lk.placeholder=info.keyPh;
   lm.value=SETTINGS.models[p]||'';lm.placeholder=info.modelPh;
 }
+/* 全局错误捕获（手机调试用） */
+window.addEventListener('error', function(e){
+  var d=document.createElement('div');
+  d.style.cssText='position:fixed;top:0;left:0;right:0;background:red;color:white;padding:10px;font-size:12px;z-index:999999;white-space:pre-wrap';
+  d.textContent='ERROR: '+(e.message||e.error);
+  document.body.appendChild(d);
+});
+window.addEventListener('unhandledrejection', function(e){
+  var d=document.createElement('div');
+  d.style.cssText='position:fixed;top:0;left:0;right:0;background:darkred;color:white;padding:10px;font-size:12px;z-index:999999;white-space:pre-wrap';
+  d.textContent='PROMISE: '+(e.reason&&e.reason.message||e.reason);
+  document.body.appendChild(d);
+});
 $('#goBtn').addEventListener('click',runAll);
 $('#regenBtn').addEventListener('click',async function(){
   var word=$('#word').value.trim();
