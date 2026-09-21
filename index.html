@@ -1167,6 +1167,32 @@ async function runAll(){
     var audioName='story-'+word+'-audio.mp3';
     $('#audioPlay').src=URL.createObjectURL(audioBlob);
     $('#audioMeta').textContent=voiceLabel(TL.voiceMode)+' · 时长 '+fmtSec(TL.narrDur);
+    var isMobile = /iPhone|iPad|iPod/.test(navigator.userAgent);
+    if(isMobile){
+      setStep('video','done','手机预览模式（可直接录屏）');
+      toast('手机端已生成音频和字幕，点播放可跟读；要视频请在电脑上打开');
+      /* 把音频挂到 video 元素播放，字幕跟随时间 */
+      var vp=$('#videoPlay');
+      vp.src=$('#audioPlay').src;
+      vp.style.background='#0F1620';
+      /* 简单字幕跟随：每 200ms 检查当前句 */
+      var subTimer=setInterval(function(){
+        var t=vp.currentTime;
+        var el=document.getElementById('liveSub');
+        if(!el)return;
+        for(var i=0;i<TL.sentences.length;i++){
+          if(t>=TL.sentences[i].start && t<=TL.sentences[i].end){
+            el.innerHTML=TL.sentences[i].en+'<br><small style="opacity:0.8">'+(TL.sentences[i].zh||'')+'</small>';
+            break;
+          }
+        }
+      },200);
+      vp.addEventListener('ended',function(){clearInterval(subTimer);});
+      $('#resultsCard').hidden=false;
+      LAST={audio:audioBlob,audioName:audioName,video:null,videoName:null,text:new Blob([$('#storyOut').textContent]),word:word};
+      try{var c2=mkCanvas(),x2=c2.getContext('2d');drawBg(x2,c2.width,c2.height);var k=Math.min(c2.width/1080,c2.height/1920);x2.save();x2.translate((c2.width-1080*k)/2,(c2.height-1920*k)/2);x2.scale(k,k);fillText(x2,SETTINGS.introTitle||"What's this?",540,700,FONT(130),'#FFFFFF',18);if(wordImgLoaded&&wordImg){x2.drawImage(wordImg,540-350,820,700,700);}x2.restore();await new Promise(function(r){c2.toBlob(function(b){window.__coverBlob=b;r();},'image/png');});if(window.__coverBlob)$('#coverImg').src=URL.createObjectURL(window.__coverBlob);}catch(e){}
+      return;
+    }
     setStep('video','run');
     var vres=null,videoErr='';
     var forceMp4=SETTINGS.forceMp4||false;
