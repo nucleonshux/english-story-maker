@@ -1,0 +1,13 @@
+{
+  "name": "tts-relay",
+  "version": "1.0.0",
+  "description": "免费 Edge TTS 中继：为静态页面提供高品质配音音频与逐词时间戳（部署到 Netlify / Vercel / 任意 Node 服务器）",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "ws": "^8.21.3"
+  }
+}
