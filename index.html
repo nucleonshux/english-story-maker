@@ -1,0 +1,1346 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>单词故事生成器 · 一键生成儿童英语小故事四件套</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230F766E'/%3E%3Cpath d='M18 22h28v24a6 6 0 0 1-6 6H24a6 6 0 0 1-6-6V22z' fill='%23fff'/%3E%3Cpath d='M24 24h16v6H24z' fill='%23F2A93B'/%3E%3Ccircle cx='46' cy='18' r='5' fill='%23F2A93B'/%3E%3C/svg%3E">
+<style>
+:root{
+  --bg:#F4F7F6; --surface:#FFFFFF; --ink:#22303C; --muted:#6B7A86;
+  --line:#E3E9ED; --teal:#0F766E; --teal-deep:#0B5D57; --teal-soft:#E4F2F0;
+  --amber:#F2A93B; --amber-soft:#FCEEDB; --ok:#1C8B5C; --err:#C1443E;
+  --radius:16px; --shadow:0 1px 2px rgba(15,45,50,.05),0 8px 24px rgba(15,45,50,.06);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{background:var(--bg);color:var(--ink);font-family:"Segoe UI","PingFang SC","Microsoft YaHei",system-ui,-apple-system,sans-serif;line-height:1.6;min-height:100vh}
+.wrap{max-width:880px;margin:0 auto;padding:20px 16px 48px}
+/* header */
+header{display:flex;align-items:center;gap:12px;padding:10px 2px 18px}
+header svg{flex:0 0 auto}
+header h1{font-size:22px;font-weight:800;letter-spacing:.5px}
+header p{font-size:13px;color:var(--muted)}
+/* cards */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px;margin-bottom:16px}
+.card h2{font-size:16px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.card h2 .n{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:8px;background:var(--teal);color:#fff;font-size:13px;flex:0 0 auto}
+/* input */
+label.f{display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:#33424F}
+.word-row{display:flex;gap:10px;flex-wrap:wrap}
+.word-row input{flex:1 1 220px;min-width:0;font-size:17px;padding:13px 16px;border:1.5px solid var(--line);border-radius:12px;outline:none;background:#FBFCFC;color:var(--ink)}
+.word-row input:focus{border-color:var(--teal);background:#fff}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;border:1.5px solid var(--line);background:#fff;color:var(--ink);border-radius:12px;padding:10px 16px;font-size:14px;font-weight:600;cursor:pointer;transition:border-color .15s,background .15s,transform .05s}
+.btn:hover{border-color:var(--teal);color:var(--teal)}
+.btn:active{transform:translateY(1px)}
+.btn:disabled{opacity:.55;cursor:not-allowed}
+.btn-primary{background:var(--teal);border-color:var(--teal);color:#fff;font-size:16px;padding:13px 22px}
+.btn-primary:hover{background:var(--teal-deep);border-color:var(--teal-deep);color:#fff}
+.btn-ghost{background:var(--amber-soft);border-color:#EFD9AE;color:#8A5A12}
+.btn-ghost:hover{border-color:var(--amber);color:#8A5A12}
+.hint{font-size:12.5px;color:var(--muted);margin-top:8px}
+.hint b{color:#33424F}
+/* settings */
+.settings{margin-top:12px;border:1px dashed var(--line);border-radius:12px;padding:0 12px;background:#FAFCFB}
+.settings summary{cursor:pointer;font-size:13.5px;font-weight:600;padding:10px 2px;color:#33424F;list-style:none}
+.settings summary::-webkit-details-marker{display:none}
+.settings summary::before{content:"⚙";margin-right:6px}
+.set-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;padding:4px 2px 14px}
+.set-grid label{display:block;font-size:12.5px;font-weight:600;color:#33424F}
+.set-grid input,.set-grid select{display:block;width:100%;margin-top:4px;font-size:13.5px;padding:9px 10px;border:1.5px solid var(--line);border-radius:10px;background:#fff;color:var(--ink);outline:none}
+.set-grid input:focus,.set-grid select:focus{border-color:var(--teal)}
+/* story */
+.story-toolbar{display:flex;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap}
+#wordCount{font-size:12.5px;color:var(--muted)}
+textarea#storyText{width:100%;min-height:96px;font-size:15px;line-height:1.7;padding:12px;border:1.5px solid var(--line);border-radius:12px;outline:none;resize:vertical;background:#FBFCFC}
+textarea#storyText:focus{border-color:var(--teal);background:#fff}
+textarea#customStory{width:100%;min-height:88px;margin-top:10px;font-size:15px;line-height:1.7;padding:12px;border:1.5px solid var(--line);border-radius:12px;outline:none;resize:vertical;background:#FBFCFC}
+textarea#customStory:focus{border-color:var(--teal);background:#fff}
+.warn-note{margin:8px 0 0;padding:9px 12px;border-radius:10px;background:#FFF6E5;border:1px solid #F5D9A0;color:#8A5A00;font-size:13px;line-height:1.6}
+#zhList{margin-top:10px;display:flex;flex-direction:column;gap:6px}
+#zhList .zh{font-size:13.5px;color:#44525E;background:#F6F8F7;border-radius:10px;padding:7px 12px}
+#zhList .zh b{color:var(--teal);font-weight:600}
+/* steps */
+#steps{list-style:none;display:flex;flex-direction:column;gap:8px;margin-bottom:10px}
+#steps li{display:flex;align-items:center;gap:10px;font-size:14px;color:#44525E}
+#steps li .dot{width:20px;height:20px;border-radius:50%;border:2px solid var(--line);flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;font-size:11px;color:#fff}
+#steps li.done .dot{background:var(--ok);border-color:var(--ok)}
+#steps li.run .dot{border-color:var(--amber);border-top-color:var(--teal);animation:spin 0.9s linear infinite}
+#steps li.fail .dot{background:var(--err);border-color:var(--err)}
+#steps li.warn .dot{background:var(--amber);border-color:var(--amber)}
+#steps li .st{font-weight:600}
+#steps li .msg{font-size:12.5px;color:var(--muted)}
+@keyframes spin{to{transform:rotate(360deg)}}
+#log{font-size:12.5px;color:var(--muted);background:#F6F8F7;border-radius:10px;padding:8px 12px;max-height:110px;overflow:auto;white-space:pre-wrap;word-break:break-all}
+/* results */
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+.result{background:#FBFCFC;border:1px solid var(--line);border-radius:14px;padding:12px}
+.result h3{font-size:14px;font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.result h3 .tag{font-size:11px;font-weight:600;color:var(--teal);background:var(--teal-soft);border-radius:999px;padding:1px 8px}
+.result audio,.result video,.result img{width:100%;border-radius:10px;background:#0F1620;display:block}
+.result img{background:none;border:1px solid var(--line)}
+.result .btn{width:100%;margin-top:10px}
+.result .meta{display:block;font-size:12px;color:var(--muted);margin-top:6px}
+pre#storyOut{font-size:13.5px;white-space:pre-wrap;word-break:break-word;background:#F6F8F7;border-radius:10px;padding:10px;max-height:220px;overflow:auto}
+/* toast */
+#toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);background:#22303C;color:#fff;font-size:13.5px;padding:10px 18px;border-radius:999px;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:99;max-width:90vw;text-align:center}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+footer{font-size:12px;color:var(--muted);text-align:center;padding-top:8px}
+@media (max-width:560px){
+  header h1{font-size:19px}
+  .wrap{padding:14px 12px 40px}
+  .card{padding:14px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <svg width="44" height="44" viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="14" fill="#0F766E"/><path d="M18 22h28v24a6 6 0 0 1-6 6H24a6 6 0 0 1-6-6V22z" fill="#fff"/><path d="M24 24h16v6H24z" fill="#F2A93B"/><circle cx="46" cy="18" r="5" fill="#F2A93B"/></svg>
+    <div>
+      <h1>单词故事生成器</h1>
+      <p>输入一个单词 → 儿童英语小故事 · 配音朗读 · 逐词字幕视频，全程在浏览器内完成</p>
+    </div>
+  </header>
+
+  <section class="card">
+    <label class="f" for="customStory">故事文案（粘贴自己的英文故事；留空则由模型按单词生成）</label>
+    <div id="promptHint" style="font-size:13px;color:#6B7785;margin-bottom:6px;cursor:pointer" title="点我复制提示词模板">
+      模型提示词模板：根据<span id="phWord" style="color:#0F766E;font-weight:700">cup</span>，写一个英语阅读文章。适合6岁儿童学习阅读。内容逻辑合理。需要一行一句英语，在每句英语用｜符号隔开中文翻译。
+    </div>
+    <textarea id="customStory" rows="5" spellcheck="false" placeholder="一行一句，或用 | 带中文翻译：The cup is blue. | 杯子是蓝色的。"></textarea>
+
+    <div class="word-row" style="margin-top:10px;justify-content:flex-start">
+      <input id="introTitle" type="text" placeholder="主标题（What's this?）" maxlength="40" autocomplete="off" style="flex:1;min-width:140px">
+      <input id="introSubtitle" type="text" placeholder="副标题（Guess what?）" maxlength="60" autocomplete="off" style="flex:1;min-width:140px">
+      <input id="word" type="text" placeholder="单词（可留空）" maxlength="24" autocomplete="off" spellcheck="false" style="flex:0 0 140px">
+    </div>
+    <div class="word-row" style="margin-top:10px;justify-content:space-between">
+      <span style="display:inline-flex;gap:8px">
+        <button id="btnUploadWord" class="btn">上传单词图</button>
+        <button id="btnUploadBg" class="btn">更换背景图</button>
+        <button id="btnResetBg" class="btn" title="恢复同目录 bg.png">恢复默认背景</button>
+      </span>
+      <button id="goBtn" class="btn-primary">一键生成</button>
+      <input type="file" id="bgFile" accept="image/*" hidden>
+      <input type="file" id="wordImgFile" accept="image/*" hidden>
+    </div>
+
+    <p class="hint">故事文案是<b>主要方式</b>；留空时才用上面的单词调模型实时生成（推荐智谱 GLM Flash 免费直连，Key 只存本地）。</p>
+    <details class="settings">
+      <summary>设置（故事模型 / 配音 / 音色 / 语速 / 比例 / 背景）</summary>
+      <div class="set-grid">
+        <label>故事模型
+          <select id="setProvider">
+            <option value="template">内置模板（免配置）</option>
+            <option value="doubao">豆包（免费额度 · 经中继）</option>
+            <option value="glm">智谱 GLM Flash（免费 · 直连）</option>
+            <option value="gemini">Gemini（可选）</option>
+          </select>
+        </label>
+        <label>配音 TTS 中继地址（推荐配置）
+          <input id="setTtsRelay" type="text" placeholder="https://你的中继域名 或留空" spellcheck="false">
+        </label>
+        <label id="llmKeyWrap"><span id="llmKeyLabel">API Key</span>
+          <input id="setLlmKey" type="password" placeholder="填写所选模型的 API Key" autocomplete="off" spellcheck="false">
+        </label>
+        <label id="llmModelWrap"><span id="llmModelLabel">模型</span>
+          <input id="setLlmModel" type="text" spellcheck="false">
+        </label>
+        <label>朗读音色
+          <select id="setVoice">
+            <option value="en-US-AnaNeural" selected>Ana · 美音童声（默认）</option>
+            <option value="en-US-JennyNeural">Jenny · 美音女声（清晰）</option>
+            <option value="en-US-AriaNeural">Aria · 美音女声</option>
+            <option value="en-US-EmmaMultilingualNeural">Emma · 美音女声（多语言）</option>
+            <option value="en-US-GuyNeural">Guy · 美音男声</option>
+            <option value="en-GB-SoniaNeural">Sonia · 英音女声</option>
+            <option value="en-GB-LibbyNeural">Libby · 英音女声</option>
+            <option value="en-AU-NatashaNeural">Natasha · 澳音女声</option>
+          </select>
+        </label>
+        <label>朗读语速
+          <select id="setRate">
+            <option value="-15%">很慢（-15%）</option>
+            <option value="-8%" selected>较慢（-8%，适合儿童）</option>
+            <option value="+0%">正常（+0%）</option>
+            <option value="+5%">稍快（+5%）</option>
+          </select>
+        </label>
+        <label>视频比例
+          <select id="setRatio">
+            <option value="9:16" selected>竖屏 9:16（抖音/小红书）</option>
+            <option value="16:9">横屏 16:9</option>
+            <option value="1:1">方形 1:1</option>
+          </select>
+        </label>
+        <label>背景
+          <select id="setBg">
+            <option value="auto" selected>bg.png（同目录自动读取）</option>
+            <option value="builtin">内置背景</option>
+          </select>
+        </label>
+        <label>视频输出
+          <span style="display:flex;align-items:center;gap:8px;margin-top:5px;font-weight:400">
+            <input type="checkbox" id="setForceMp4" style="width:auto"> 始终输出 MP4（通用，但生成较慢）
+          </span>
+        </label>
+      </div>
+      <p class="hint">视频默认竖屏 9:16；若你确实要横屏 16:9，在“视频比例”里切换即可。背景图放在本网页同目录、命名为 <b>bg.png</b> 即可随时替换（兼容 bg.PNG 等大小写）。<br><b>配音说明：</b>浏览器无法直连微软 Edge 语音（被 403 拦截），需配置一次免费 TTS 中继（Cloudflare Workers 粘贴代码即用，约 3 分钟，见 README），把地址填到上方“配音 TTS 中继地址”。未配置时自动降级为系统语音试听（视频将无法配音）；豆包故事也需要该中继转发。</p>
+    </details>
+  </section>
+
+  <section class="card" id="storyCard" hidden>
+    <h2><span class="n">1</span>故事 <span id="wordCount"></span></h2>
+    <div class="story-toolbar">
+      <button id="regenBtn" class="btn btn-ghost">重新生成故事</button>
+      <span class="hint" style="margin:0">可手动修改英文文本；中文翻译按原句匹配，新增句子无翻译。</span>
+    </div>
+    <textarea id="storyText" rows="5" spellcheck="false" placeholder="故事将在这里生成，可直接编辑……"></textarea>
+    <p id="modelNotice" class="warn-note" hidden></p>
+    <div id="zhList"></div>
+  </section>
+
+  <section class="card" id="progressCard" hidden>
+    <h2><span class="n">2</span>生成进度</h2>
+    <ol id="steps"></ol>
+    <div id="log"></div>
+  </section>
+
+  <section class="card" id="resultsCard" hidden>
+    <h2><span class="n">3</span>产物</h2>
+    <div class="grid">
+      <div class="result">
+        <h3>配音朗读 <span class="tag">MP3</span></h3>
+        <audio id="audioPlay" controls preload="metadata"></audio>
+        <button id="btnSpeak" class="btn" style="display:none">用系统语音试听故事</button>
+        <button id="dlAudio" class="btn">下载配音 MP3</button>
+        <span class="meta" id="audioMeta"></span>
+      </div>
+      <div class="result">
+        <h3>逐词字幕视频 <span class="tag" id="videoFmtTag">MP4</span></h3>
+        <video id="videoPlay" controls preload="auto" playsinline></video>
+        <button id="dlVideo" class="btn">下载视频</button>
+        <span class="meta" id="videoMeta"></span>
+      </div>
+      <div class="result">
+        <h3>故事文本 <span class="tag">TXT</span></h3>
+        <pre id="storyOut"></pre>
+        <button id="dlText" class="btn">下载故事文本</button>
+      </div>
+      <div class="result">
+        <h3>封面图（副标题帧）<span class="tag">PNG</span></h3>
+        <img id="coverImg" style="width:100%;border-radius:12px;display:none" alt="封面">
+        <button id="dlCover" class="btn" style="margin-top:8px">下载封面图</button>
+      </div>
+    </div>
+  </section>
+
+  <footer>本地运行：全部生成都在你的浏览器里完成，不上传任何内容（可选模型 API Key 除外，仅直连对应服务商）。视频为纯前端合成，无服务器成本。 · v3.6</footer>
+</div>
+<img id="bgProbe" src="bg.png" alt="" style="display:none" aria-hidden="true">
+<div id="toast" role="status"></div>
+<script>
+"use strict";
+/* ============ 工具函数 ============ */
+var $=function(s,c){return (c||document).querySelector(s)};
+var $$=function(s,c){return Array.prototype.slice.call((c||document).querySelectorAll(s))};
+function toast(msg){var t=$('#toast');t.textContent=msg;t.classList.add('show');clearTimeout(toast._h);toast._h=setTimeout(function(){t.classList.remove('show')},2600);}
+function download(blob, name){
+  var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;
+  document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},4000);
+}
+function uuidNoDash(){return (crypto.randomUUID?crypto.randomUUID():'xxxxxxxxxxxx4xxxyxxxxxxxxxxxxxxx'.replace(/[xy]/g,function(c){var r=Math.random()*16|0,v=c==='x'?r:(r&0x3|0x8);return v.toString(16)})).replace(/-/g,'');}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&apos;');}
+function sha256hex(str){
+  return crypto.subtle.digest('SHA-256',new TextEncoder().encode(str)).then(function(buf){
+    return Array.prototype.map.call(new Uint8Array(buf),function(b){return ('0'+b.toString(16)).slice(-2)}).join('');
+  });
+}
+function fmtSec(s){s=Math.max(0,s||0);var m=Math.floor(s/60),ss=(s-m*60);return m+':'+(ss<10?'0':'')+ss.toFixed(1);}
+/* 保存/读取设置 */
+var SETTINGS=(function(){
+  var d={provider:'glm',keys:{doubao:'',glm:'',gemini:''},models:{doubao:'doubao-seed-1.6-flash',glm:'glm-4-flash',gemini:'gemini-2.5-flash'},voice:'en-US-AnaNeural',rate:'-8%',ratio:'9:16',bgMode:'auto',ttsRelay:'',forceMp4:false,introTitle:"What's this?",introSubtitle:"Guess what this is?",customBg:''};
+  try{var v=JSON.parse(localStorage.getItem('wordStorySettings')||'null');if(v)for(var k in d)if(v[k]!==undefined)d[k]=v[k];}catch(e){}
+  if(d.geminiKey&&!d.keys.gemini){d.keys.gemini=d.geminiKey;}d.geminiKey='';
+  if(d.voice==='en-US-JennyNeural')d.voice='en-US-AnaNeural';
+  if(d.provider==='template')d.provider='glm';
+  if(d.model&&!d.models.gemini){d.models.gemini=d.model;}d.model='';
+  return d;
+})();
+function saveSettings(){try{localStorage.setItem('wordStorySettings',JSON.stringify(SETTINGS));}catch(e){}}
+var RATIOS={'9:16':{w:1080,h:1920},'16:9':{w:1920,h:1080},'1:1':{w:1080,h:1080}};
+
+/* ============ 背景 ============ */
+var bgImg=null,bgLoaded=false;var wordImg=null,wordImgLoaded=false;
+function loadBg(){
+  if(SETTINGS.customBg){
+    var im=new Image();
+    im.onload=function(){bgImg=im;bgLoaded=true;};
+    im.onerror=function(){bgImg=null;bgLoaded=true;};
+    im.src=SETTINGS.customBg;
+    return;
+  }
+  if(SETTINGS.bgMode==='builtin'){bgImg=null;bgLoaded=true;return;}
+  var probe=$('#bgProbe'), cands=['bg.png','bg.PNG','bg.jpg','background.png'], i=0;
+  (function next(){
+    if(i>=cands.length){bgImg=null;bgLoaded=true;toast('未找到背景图，已使用内置背景（放入 bg.png 即可替换）');return;}
+    var p=cands[i++];probe.onload=function(){var im=new Image();im.onload=function(){bgImg=im;bgLoaded=true;};im.onerror=function(){next();};im.src=p;};
+    probe.onerror=next;probe.src=p;
+  })();
+}
+function drawBg(ctx,W,H){
+  if(bgImg&&bgImg.complete&&bgImg.naturalWidth>0){
+    var s=Math.max(W/bgImg.naturalWidth,H/bgImg.naturalHeight);
+    var dw=bgImg.naturalWidth*s,dh=bgImg.naturalHeight*s;
+    ctx.drawImage(bgImg,(W-dw)/2,(H-dh)/2,dw,dh);
+  }else{drawBuiltinBg(ctx,W,H);}
+  /* 顶部与底部轻微压暗，保证文字可读 */
+  var g=ctx.createLinearGradient(0,0,0,H);
+  g.addColorStop(0,'rgba(15,30,40,0.16)');g.addColorStop(0.25,'rgba(15,30,40,0)');
+  g.addColorStop(0.8,'rgba(15,30,40,0)');g.addColorStop(1,'rgba(15,30,40,0.14)');
+  ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+}
+function drawBuiltinBg(ctx,W,H){
+  var g=ctx.createLinearGradient(0,0,0,H);
+  g.addColorStop(0,'#A9D8F0');g.addColorStop(0.55,'#DFF3F0');g.addColorStop(1,'#CBE8B8');
+  ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+  ctx.fillStyle='#F9D56E';ctx.beginPath();ctx.arc(W*0.84,H*0.12,W*0.09,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='rgba(255,255,255,0.85)';
+  [0,1].forEach(function(k){
+    ctx.beginPath();ctx.ellipse(W*(0.2+k*0.35),H*(0.2+k*0.13),W*0.12,H*0.05,0,0,Math.PI*2);ctx.fill();
+  });
+  ctx.fillStyle='#7FBF7A';
+  ctx.fillRect(0,H*0.86,W,H*0.14);
+  ctx.beginPath();ctx.arc(W*0.12,H*0.86,H*0.05,Math.PI,0);ctx.fill();
+  ctx.beginPath();ctx.arc(W*0.9,H*0.86,H*0.04,Math.PI,0);ctx.fill();
+}
+
+/* ============ 故事生成 ============ */
+var COLOR_ZH={red:'红',blue:'蓝',yellow:'黄',green:'绿',orange:'橙',pink:'粉',purple:'紫',brown:'棕',white:'白',black:'黑'};
+var COLOR_POOL=['red','blue','yellow','green','orange','pink'];
+var DICT={
+  ball:'球',cat:'猫咪',dog:'小狗',sun:'太阳',moon:'月亮',star:'星星',tree:'树',flower:'花',bird:'小鸟',
+  fish:'小鱼',rabbit:'兔子',duck:'鸭子',pig:'小猪',cow:'奶牛',sheep:'小羊',horse:'小马',lion:'狮子',
+  tiger:'老虎',bear:'小熊',monkey:'猴子',elephant:'大象',giraffe:'长颈鹿',panda:'熊猫',fox:'狐狸',
+  frog:'青蛙',bee:'蜜蜂',butterfly:'蝴蝶',ant:'蚂蚁',car:'小汽车',bus:'公交车',train:'火车',plane:'飞机',
+  boat:'小船',bike:'自行车',balloon:'气球',kite:'风筝',toy:'玩具',doll:'娃娃',teddy:'泰迪熊',
+  block:'积木',book:'书',pen:'笔',pencil:'铅笔',bag:'书包',hat:'帽子',shoe:'鞋子',sock:'袜子',
+  apple:'苹果',banana:'香蕉',orange:'橙子',grape:'葡萄',watermelon:'西瓜',peach:'桃子',pear:'梨',
+  cake:'蛋糕',cookie:'饼干',bread:'面包',milk:'牛奶',egg:'鸡蛋',rice:'米饭',ice:'冰',icecream:'冰淇淋',
+  candy:'糖果',chocolate:'巧克力',water:'水',juice:'果汁',tea:'茶',house:'房子',door:'门',window:'窗户',
+  table:'桌子',chair:'椅子',bed:'床',lamp:'台灯',clock:'时钟',phone:'手机',umbrella:'雨伞',key:'钥匙',
+  cup:'杯子',bowl:'碗',plate:'盘子',spoon:'勺子',fork:'叉子',shoe:'鞋子',shirt:'衬衫',dress:'裙子',
+  pants:'裤子',coat:'外套',scarf:'围巾',glove:'手套',mitten:'手套',sky:'天空',cloud:'云朵',rain:'雨',
+  snow:'雪',wind:'风',rainbow:'彩虹',grass:'草地',hill:'小山',river:'小河',sea:'大海',beach:'沙滩',
+  stone:'石头',leaf:'叶子',bug:'小虫子',snail:'蜗牛',turtle:'乌龟',shark:'鲨鱼',whale:'鲸鱼',
+  penguin:'企鹅',kangaroo:'袋鼠',camel:'骆驼',deer:'小鹿',mouse:'小老鼠',chicken:'小鸡',rooster:'公鸡',
+  cat:'猫',goat:'山羊',zebra:'斑马',hippo:'河马',rhino:'犀牛',owl:'猫头鹰',parrot:'鹦鹉',swan:'天鹅',
+  mom:'妈妈',dad:'爸爸',baby:'宝宝',boy:'男孩',girl:'女孩',friend:'朋友',teacher:'老师',family:'家人',
+  hand:'手',foot:'脚',eye:'眼睛',ear:'耳朵',nose:'鼻子',mouth:'嘴巴',hair:'头发',tooth:'牙齿',
+  smile:'微笑',heart:'爱心',gift:'礼物',party:'派对',music:'音乐',song:'歌曲',dance:'舞蹈',game:'游戏',
+  bed:'小床',nap:'午睡',home:'家',school:'学校',park:'公园',zoo:'动物园',farm:'农场',garden:'花园',
+  day:'白天',night:'夜晚',morning:'早上',food:'食物',color:'颜色',number:'数字',letter:'字母',name:'名字'
+};
+function zhOf(w){return DICT[w]||w;}
+function isVowel(w){return /^[aeiouAEIOU]/.test(w);}
+function article(w){return isVowel(w)?'an':'a';}
+function pickColor(){return COLOR_POOL[Math.floor(Math.random()*COLOR_POOL.length)];}
+var PLACE_POOL=['park','garden','school','zoo','farm'];
+var PLACE_ZH={park:'公园',garden:'花园',school:'学校',zoo:'动物园',farm:'农场'};
+var FEEL_POOL=[['play','玩'],['dance','跳舞'],['sing','唱歌']];
+function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
+/* ===== 诊断上报：把运行环境与错误原样发给本地服务（仅用于排查，正式部署无此服务时静默跳过）===== */
+function reportDiag(kind, data){
+  try{
+    fetch('/diag',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+      kind:kind,ts:new Date().toISOString(),
+      ua:navigator.userAgent,data:data
+    })}).catch(function(){});
+  }catch(e){}
+}
+function envSnapshot(){
+  var r={};
+  try{r.canCaptureStream=!!(HTMLCanvasElement.prototype.captureStream);}catch(e){r.canCaptureStream='err';}
+  r.hasMediaRecorder=!!window.MediaRecorder;
+  r.hasAudioContext=!!(window.AudioContext||window.webkitAudioContext);
+  r.hasOffscreen=!!window.OffscreenCanvas;
+  r.provider=SETTINGS.provider;r.hasRelay=!!(SETTINGS.ttsRelay&&SETTINGS.ttsRelay.trim());
+  return r;
+}
+
+function genStoryTemplates(word){
+  var w=word.toLowerCase(), art=article(w), zw=zhOf(w);
+  var c=pickColor(), zc=COLOR_ZH[c];
+  var pl=pick(PLACE_POOL), zpl=PLACE_ZH[pl];
+  var fe=pick(FEEL_POOL), zfe=fe[1]; fe=fe[0];
+  var A=[
+    [
+      ['In the morning, I see {A} {W}.','早上，我看到了一个{ZW}。'],
+      ['It is {C} and looks so nice.','它是{ZC}色的，真好看。'],
+      ['I say hello to the {W}.','我向{ZW}问好。'],
+      ['We run and jump in the {PL}.','我们在{ZPL}里跑呀跳呀。'],
+      ['The {W} is so happy, and so am I.','{ZW}很开心，我也很开心。'],
+      ['We laugh and sing a happy song.','我们笑着唱一首开心的歌。'],
+      ['Now it is time to go home.','现在该回家了。'],
+      ['Goodbye, little {W}! See you tomorrow!','再见，小{ZW}！明天见！']
+    ],
+    [
+      ['Where is the {W} today?','{ZW}今天在哪里呀？'],
+      ['I look in the {PL} first.','我先在{ZPL}里找。'],
+      ['I look under the big tree.','我又在大树下面找。'],
+      ['Oh! There it is! I am so glad!','哦！它在那儿！我好开心！'],
+      ['The {W} is my best friend.','{ZW}是我最好的朋友。'],
+      ['We {FE} and play together.','我们一起{ZFE}一起玩。'],
+      ['I like the {W} a lot, you know.','我很喜欢{ZW}，你知道吗。'],
+      ['Let us play every single day!','我们每一天都一起玩吧！']
+    ],
+    [
+      ['This is {A} {W}. Do you know it?','这是一个{ZW}，你知道吗？'],
+      ['It is small and {C}.','它小小的，是{ZC}色的。'],
+      ['It likes to {FE} every day.','它喜欢每天{ZFE}。'],
+      ['I find the {W} in the {PL}.','我在{ZPL}里找到了{ZW}。'],
+      ['It makes me smile a lot.','它让我常常微笑。'],
+      ['I love to look at the {W}.','我喜欢看着{ZW}。'],
+      ['We are good friends now.','我们现在是好朋友了。'],
+      ['I will take care of the {W}.','我会好好照顾{ZW}。']
+    ],
+    [
+      ['In the morning, I see a {W}.','早上，我看到了一个{ZW}。'],
+      ['The {W} is {C} today.','{ZW}今天是{ZC}色的。'],
+      ['We go to the {PL} together.','我们一起去{ZPL}。'],
+      ['We sing a little happy song.','我们唱一首快乐的小歌。'],
+      ['The {W} jumps up and down.','{ZW}跳上跳下。'],
+      ['We {FE} until the sun goes down.','我们一直{ZFE}到太阳下山。'],
+      ['What a happy and fun day!','多么开心又好玩的一天呀！'],
+      ['I love the {W} with all my heart.','我真心地爱着{ZW}。']
+    ],
+    [
+      ['The {W} is my best friend.','{ZW}是我最好的朋友。'],
+      ['We play in the {PL} every day.','我们每天在{ZPL}里玩。'],
+      ['The {W} gives me a big smile.','{ZW}给了我一个大大的微笑。'],
+      ['A smile is a good gift.','微笑是最好的礼物。'],
+      ['We {FE} and share our toys.','我们一起{ZFE}，还分享玩具。'],
+      ['The {W} is kind and sweet.','{ZW}又善良又温柔。'],
+      ['Thank you, dear {W}! I like you!','谢谢你，亲爱的{ZW}！我喜欢你！'],
+      ['We will be friends forever.','我们会永远做好朋友。']
+    ],
+    [
+      ['Night comes. The sky is dark.','夜晚来了，天空黑黑的。'],
+      ['Where is the {W} now?','{ZW}现在在哪里呀？'],
+      ['The {W} is under the big tree.','{ZW}在大树下面。'],
+      ['It is time to rest and sleep.','该休息睡觉了。'],
+      ['It closes its little eyes.','它闭上了它的小眼睛。'],
+      ['I say good night to the {W}.','我对{ZW}说晚安。'],
+      ['Sweet dreams, my little {W}!','做个好梦，我的小{ZW}！'],
+      ['See you in the morning light!','我们在晨光里再见！']
+    ]
+  ];
+  var T=pick(A);
+  return T.map(function(p){
+    return {
+      en:p[0].replace('{A}',art).replace('{W}',w).replace('{C}',c).replace('{PL}',pl).replace('{FE}',fe),
+      zh:p[1].replace('{ZW}',zw).replace('{ZC}',zc).replace('{ZPL}',zpl).replace('{ZFE}',zfe)
+    };
+  });
+}
+function storyPrompt(word){
+  return 'Write a tiny English reading story for a 4-6 year old child learning to read, about the word "'+word+'". Tell a short story with a simple plot (beginning, middle, end) that fits what "'+word+'" actually is: if it is an object, describe/introduce what it is, where it is, what it does, or who uses it -- do not give it human feelings or actions it cannot have; if it is an animal or person, tell a little story about its day. The word "'+word+'" should appear in about half of the sentences (2 to 4 times), not in every sentence. Rules: present tense, very simple words, each sentence 3 to 8 words, 6 to 8 sentences, 55 to 65 words total so it takes about 30 seconds to read aloud, warm happy tone, and make each story fresh and different. For every sentence also give a natural, child-friendly Simplified Chinese translation. Return ONLY valid JSON, no markdown: {"sentences":[{"en":"...","zh":"..."}]}';
+}
+function parseStoryJSON(txt,name){
+  var m=txt.match(/\{[\s\S]*\}/);if(!m)throw new Error(name+' 返回格式异常');
+  var data=JSON.parse(m[0]);
+  if(!data||!Array.isArray(data.sentences)||!data.sentences.length)throw new Error(name+' 未返回句子');
+  return data.sentences.map(function(s){return {en:String(s.en||'').trim(),zh:String(s.zh||'').trim()};}).filter(function(s){return s.en;});
+}
+async function genStoryGemini(word){
+  var prompt=storyPrompt(word);
+  var url='https://generativelanguage.googleapis.com/v1beta/models/'+encodeURIComponent(SETTINGS.models.gemini)+':generateContent?key='+encodeURIComponent(SETTINGS.keys.gemini);
+  var resp=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.8,responseMimeType:'application/json'}})});
+  if(!resp.ok){var t=await resp.text();throw new Error('Gemini HTTP '+resp.status+'：'+t.slice(0,140));}
+  var j=await resp.json();
+  var txt=(j.candidates&&j.candidates[0]&&j.candidates[0].content&&j.candidates[0].content.parts&&j.candidates[0].content.parts[0].text)||'';
+  return parseStoryJSON(txt,'Gemini');
+}
+/* OpenAI 兼容接口（智谱等可直接从浏览器调用） */
+async function genStoryOpenAI(word,base,key,model,name){
+  var prompt=storyPrompt(word);
+  var resp=await fetch(base,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},body:JSON.stringify({model:model,messages:[{role:'user',content:prompt}],temperature:0.8,max_tokens:900})});
+  if(!resp.ok){var t=await resp.text();throw new Error(name+' HTTP '+resp.status+'：'+t.slice(0,140));}
+  var j=await resp.json();
+  var txt=(j.choices&&j.choices[0]&&j.choices[0].message&&j.choices[0].message.content)||'';
+  return parseStoryJSON(txt,name);
+}
+async function genStoryGLM(word){
+  if(!SETTINGS.keys.glm)throw new Error('未填智谱 API Key');
+  return genStoryOpenAI(word,'https://open.bigmodel.cn/api/paas/v4/chat/completions',SETTINGS.keys.glm,SETTINGS.models.glm,'智谱');
+}
+/* 豆包：浏览器被 CORS 拦截，经中继 /llm 转发 */
+async function genStoryDoubao(word){
+  if(!SETTINGS.keys.doubao)throw new Error('未填豆包 API Key');
+  var base=(SETTINGS.ttsRelay||'').trim().replace(/\/+$/,'');
+  if(!base)throw new Error('豆包需经中继转发，请先配置中继地址');
+  var resp=await fetch(base+'/llm',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+    url:'https://ark.cn-beijing.volces.com/api/v3/chat/completions',
+    apiKey:SETTINGS.keys.doubao,
+    model:SETTINGS.models.doubao,
+    messages:[{role:'user',content:storyPrompt(word)}],
+    maxTokens:900
+  })});
+  if(!resp.ok){var em='';try{var eo=(await resp.json()).error;em=(typeof eo==='string')?eo:JSON.stringify(eo||'');}catch(e){}throw new Error('豆包 HTTP '+resp.status+' '+em);}
+  var j=await resp.json();
+  var txt=(j.choices&&j.choices[0]&&j.choices[0].message&&j.choices[0].message.content)||'';
+  return parseStoryJSON(txt,'豆包');
+}
+async function genStory(word){
+  word=(word||'').trim().toLowerCase().replace(/\s+/g,' ');
+  if(!word)throw new Error('请先输入一个单词');
+  var p=SETTINGS.provider||'template';
+  if(p==='gemini'&&SETTINGS.keys.gemini){
+    try{var s1=await genStoryGemini(word);log('故事：Gemini 生成 '+s1.length+' 句');return s1;}
+    catch(e){STORY_NOTE='error';log('Gemini 失败，改用内置模板：'+e.message);}
+  }else if(p==='doubao'){
+    try{var s2=await genStoryDoubao(word);log('故事：豆包生成 '+s2.length+' 句');return s2;}
+    catch(e){STORY_NOTE='error';log('豆包失败，改用内置模板：'+e.message);}
+  }else if(p==='glm'&&SETTINGS.keys.glm){
+    try{var s3=await genStoryGLM(word);log('故事：智谱生成 '+s3.length+' 句');return s3;}
+    catch(e){STORY_NOTE='error';log('智谱失败，改用内置模板：'+e.message);}
+  }else if(p!=='template'){
+    STORY_NOTE='noKey';
+    log('未填写所选模型的 Key，改用内置模板。');
+  }
+  return genStoryTemplates(word);
+}
+function splitSentences(text){
+  return text.replace(/\s+/g,' ').trim().split(/(?<=[.!?])\s+/).map(function(s){return s.trim();}).filter(Boolean);
+}
+/* ============ TTS：Edge（主，词级时间戳） ============ */
+var EDGE_TOKEN='6A5AA1D4EAFF4E9FB37E23D68491D6F4';
+var EDGE_VER='1-143.0.3650.75';
+function dateStr(){
+  var d=new Date(),days=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],mos=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var p=function(n){return (n<10?'0':'')+n;};
+  return days[d.getUTCDay()]+' '+mos[d.getUTCMonth()]+' '+p(d.getUTCDate())+' '+d.getUTCFullYear()+' '+p(d.getUTCHours())+':'+p(d.getUTCMinutes())+':'+p(d.getUTCSeconds())+' GMT+0000 (Coordinated Universal Time)';
+}
+function edgeGecToken(){
+  var X=Date.now()/1000+11644473600;
+  return sha256hex(Math.round((X-(X%300))*1e7)+EDGE_TOKEN).then(function(h){return h.toUpperCase();});
+}
+function edgeSSML(text,voice,rate,volume,pitch){
+  return "<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xml:lang='en-US'><voice name='"+voice+"'><prosody pitch='"+pitch+"' rate='"+rate+"' volume='"+volume+"'>"+esc(text)+"</prosody></voice></speak>";
+}
+function edgeTTS(text,voice,rate){
+  return new Promise(function(resolve,reject){
+    var id=uuidNoDash(), done=false, chunks=[], words=[], audioBytes=0;
+    var fail=function(err){if(done)return;done=true;try{ws&&ws.close();}catch(e){}reject(err);};
+    edgeGecToken().then(function(token){
+      var url='wss://speech.platform.bing.com/consumer/speech/synthesize/readaloud/edge/v1?TrustedClientToken='+EDGE_TOKEN+'&ConnectionId='+id+'&Sec-MS-GEC='+token+'&Sec-MS-GEC-Version='+EDGE_VER;
+      var ws;
+      try{ws=new WebSocket(url);}catch(e){return fail(e);}
+      ws.binaryType='arraybuffer';
+      var timer=setTimeout(function(){fail(new Error('Edge TTS 超时'));},40000);
+      ws.onopen=function(){
+        var cfg='{"context":{"synthesis":{"audio":{"metadataoptions":{"sentenceBoundaryEnabled":"false","wordBoundaryEnabled":"true"},"outputFormat":"audio-24khz-48kbitrate-mono-mp3"}}}}';
+        ws.send('X-Timestamp:'+dateStr()+'\r\nContent-Type:application/json; charset=utf-8\r\nPath:speech.config\r\n\r\n'+cfg+'\r\n');
+        var rid=uuidNoDash();
+        ws.send('X-RequestId:'+rid+'\r\nContent-Type:application/ssml+xml\r\nX-Timestamp:'+dateStr()+'Z\r\nPath:ssml\r\n\r\n'+edgeSSML(text,voice,rate,'+0%','+0Hz'));
+      };
+      ws.onmessage=function(ev){
+        if(typeof ev.data==='string'){
+          var i=ev.data.indexOf('\r\n\r\n');if(i<0)return;
+          var head=ev.data.slice(0,i),body=ev.data.slice(i+4);
+          var pm=head.match(/Path:([^\r\n]+)/),path=pm?pm[1]:'';
+          if(path==='audio.metadata'){
+            try{
+              var j=JSON.parse(body);
+              (j.Metadata||[]).forEach(function(m){
+                if(m.Type==='WordBoundary'&&m.Data){
+                  var wd=m.Data.text&&m.Data.text.Text!==undefined?m.Data.text.Text:(m.Data.Text||'');
+                  words.push({word:String(wd),start:((m.Data.Offset||0)/1e7),dur:((m.Data.Duration||0)/1e7)});
+                }
+              });
+            }catch(e){}
+          }
+        }else if(ev.data instanceof ArrayBuffer){
+          var buf=new Uint8Array(ev.data);
+          if(buf.length<2)return;
+          var hl=(buf[0]<<8)|buf[1];
+          if(2+hl>buf.length)return;
+          var data=buf.subarray(2+hl);
+          if(data.length)chunks.push(data);
+        }
+      };
+      ws.onerror=function(){fail(new Error('Edge TTS 连接失败（服务可能暂时不可用）'));};
+      ws.onclose=function(){
+        clearTimeout(timer);
+        if(done)return;done=true;
+        if(!chunks.length){reject(new Error('Edge TTS 未返回音频'));return;}
+        var total=0;chunks.forEach(function(c){total+=c.length;});
+        var all=new Uint8Array(total),off=0;
+        chunks.forEach(function(c){all.set(c,off);off+=c.length;});
+        var blob=new Blob([all],{type:'audio/mpeg'});
+        var dur=words.length?Math.max.apply(null,words.map(function(w){return w.start+w.dur;})):0;
+        resolve({blob:blob,words:words,duration:Math.max(dur,0.1)});
+      };
+    }).catch(fail);
+  });
+}
+/* ============ TTS：自托管中继（推荐，Edge 高品质语音 + 词级时间戳） ============ */
+async function relayTTS(text,voice,rate){
+  var base=(SETTINGS.ttsRelay||'').trim().replace(/\/+$/,'');
+  if(!base)throw new Error('未配置中继地址');
+  var u=base+'/tts?text='+encodeURIComponent(text)+'&voice='+encodeURIComponent(voice)+'&rate='+encodeURIComponent(rate);
+  var ctl=new AbortController(),tm=setTimeout(function(){ctl.abort();},45000);
+  var r;
+  try{r=await fetch(u,{signal:ctl.signal});}finally{clearTimeout(tm);}
+  if(!r.ok){var em='';try{em=((await r.json()).error)||'';}catch(e){}throw new Error('中继 HTTP '+r.status+' '+em);}
+  var j=await r.json();
+  if(!j.audio)throw new Error('中继未返回音频');
+  var bin=atob(j.audio),arr=new Uint8Array(bin.length);
+  for(var i=0;i<bin.length;i++)arr[i]=bin.charCodeAt(i);
+  var words=(j.words||[]).map(function(w){return {word:String(w.word||''),start:+(w.start||0),dur:+(w.dur||0)};});
+  var dur=j.duration||(words.length?Math.max.apply(null,words.map(function(w){return w.start+w.dur;})):0);
+  return {blob:new Blob([arr],{type:'audio/mpeg'}),words:words,duration:Math.max(dur,0.1)};
+}
+/* ============ TTS：系统语音（最后兜底，仅预览） ============ */
+function wsSpeak(text,rate){
+  return new Promise(function(resolve){
+    if(!('speechSynthesis' in window))return resolve(false);
+    var u=new SpeechSynthesisUtterance(text);u.lang='en-US';u.rate=1.2;
+    var t=setTimeout(function(){resolve(true);},Math.max(3000,text.length*120));
+    u.onend=function(){clearTimeout(t);resolve(true);};
+    u.onerror=function(){clearTimeout(t);resolve(false);};
+    speechSynthesis.cancel();speechSynthesis.speak(u);
+  });
+}
+/* ============ 音频工具 ============ */
+var audioCtx=null;
+function getAudioCtx(){if(!audioCtx)audioCtx=new (window.AudioContext||window.webkitAudioContext)();if(audioCtx.state==='suspended')audioCtx.resume();return audioCtx;}
+async function decodeBlob(blob){var ctx=getAudioCtx();var ab=await blob.arrayBuffer();return ctx.decodeAudioData(ab);}
+function bufferToWav(buffer){
+  var numCh=buffer.numberOfChannels,rate=buffer.sampleRate,len=buffer.length,bytes=numCh*len*2;
+  var ab=new ArrayBuffer(44+bytes),dv=new DataView(ab);
+  function wstr(o,s){for(var i=0;i<s.length;i++)dv.setUint8(o+i,s.charCodeAt(i));}
+  wstr(0,'RIFF');dv.setUint32(4,36+bytes,true);wstr(8,'WAVE');wstr(12,'fmt ');
+  dv.setUint32(16,16,true);dv.setUint16(20,1,true);dv.setUint16(22,numCh,true);
+  dv.setUint32(24,rate,true);dv.setUint32(28,rate*numCh*2,true);dv.setUint16(32,numCh*2,true);dv.setUint16(34,16,true);
+  wstr(36,'data');dv.setUint32(40,bytes,true);
+  var chans=[];for(var c=0;c<numCh;c++)chans.push(buffer.getChannelData(c));
+  var off=44;
+  for(var i=0;i<len;i++)for(var c=0;c<numCh;c++){
+    var s=Math.max(-1,Math.min(1,chans[c][i]));dv.setInt16(off,s<0?s*0x8000:s*0x7FFF,true);off+=2;
+  }
+  return new Uint8Array(ab);
+}
+function mixTimeline(introBuf,narrBuf,introAt,narrAt,totalLen){
+  /* introBuf / narrBuf 为 AudioBuffer，合成为单声道 buffer（取第 0 声道） */
+  var rate=narrBuf?narrBuf.sampleRate:(introBuf?introBuf.sampleRate:24000);
+  var len=Math.ceil(totalLen*rate);
+  var out=audioCtx.createBuffer(1,len,rate);
+  var od=out.getChannelData(0);
+  function put(buf,at){
+    if(!buf)return;var sd=buf.getChannelData(0),off=Math.floor(at*rate);
+    for(var i=0;i<sd.length&&off+i<len;i++)od[off+i]+=sd[i];
+  }
+  put(introBuf,introAt);put(narrBuf,narrAt);
+  return out;
+}
+function mixThree(a,b,c,atA,atB,atC,totalLen){
+  var rate=c?c.sampleRate:(a?a.sampleRate:24000);
+  var len=Math.ceil(totalLen*rate);
+  var out=audioCtx.createBuffer(1,len,rate);
+  var od=out.getChannelData(0);
+  function put(buf,at){
+    if(!buf)return;var sd=buf.getChannelData(0),off=Math.floor(at*rate);
+    for(var i=0;i<sd.length&&off+i<len;i++)od[off+i]+=sd[i];
+  }
+  put(a,atA);put(b,atB);put(c,atC);
+  return out;
+}
+/* ============ 词级时间轴 ============ */
+function normWord(w){return String(w).toLowerCase().replace(/[^a-z0-9]/g,'');}
+function buildTiming(sentences,boundaries,totalDur){
+  var toks=[];
+  sentences.forEach(function(s,si){
+    s.en.split(/\s+/).forEach(function(raw,wi){toks.push({raw:raw,text:normWord(raw),sIdx:si,wIdx:wi,start:null,end:null});});
+  });
+  var k=0;
+  (boundaries||[]).forEach(function(b){
+    var bn=normWord(b.word);if(!bn)return;
+    for(;k<toks.length;k++){
+      var t=toks[k];
+      if(t.text===bn||(bn.length>2&&(t.text.indexOf(bn)===0||bn.indexOf(t.text)===0))){t.start=b.start;t.end=b.start+b.dur;k++;break;}
+    }
+  });
+  return sentences.map(function(s,si){
+    var st=toks.filter(function(t){return t.sIdx===si;});
+    var known=st.filter(function(t){return t.start!==null;});
+    var sStart,sEnd;
+    if(known.length){
+      sStart=Math.min.apply(null,known.map(function(t){return t.start;}));
+      sEnd=Math.max.apply(null,known.map(function(t){return t.end;}));
+    }else{
+      var totalWords=toks.length||1,before=0,i;
+      for(i=0;i<si;i++)before+=sentences[i].en.split(/\s+/).length;
+      var dur=totalDur*(st.length/totalWords);
+      sStart=totalDur*(before/totalWords);sEnd=sStart+dur;
+    }
+    /* 填充缺失词的时间：按字符长度在相邻已知点之间插值 */
+    var nextKnown=function(idx){for(var i=idx+1;i<st.length;i++)if(st[i].start!==null)return i;return -1;};
+    var lastT=sStart,i2=0;
+    while(i2<st.length){
+      var t2=st[i2];
+      if(t2.start!==null){lastT=t2.end;i2++;continue;}
+      var nk=nextKnown(i2),endT=nk>=0?st[nk].start:sEnd;
+      var chars=0,j;
+      for(j=i2;j<(nk>=0?nk:st.length);j++)chars+=Math.max(1,st[j].raw.length);
+      var c=0;
+      for(j=i2;j<(nk>=0?nk:st.length);j++){
+        var wl=Math.max(1,st[j].raw.length);
+        st[j].start=lastT+(c/chars)*(endT-lastT);c+=wl;
+        st[j].end=(j<st.length-1)?Math.max(st[j].start+0.12,st[j].start+(wl/chars)*(endT-lastT)*0.92):endT;
+      }
+      lastT=endT;i2=(nk>=0?nk:st.length);
+    }
+    var words=st.map(function(t){return {text:t.raw,start:t.start,end:t.end};});
+    return {en:s.en,zh:s.zh||'',start:sStart,end:sEnd,words:words};
+  });
+}
+var INTRO_DUR=4, OUTRO_DUR=1.4, SENT_GAP=0.7, HOLD_AFTER=2.0;
+async function buildTimelineLegacy(sentences,word,voice,rate){
+  var text=sentences.map(function(s){return s.en;}).join(' ');
+  var narr=null,voiceMode=null,narrDur=0;
+  if(SETTINGS.ttsRelay&&SETTINGS.ttsRelay.trim()){
+    try{
+      narr=await relayTTS(text,voice,rate);
+      voiceMode='relay';
+      log('配音：中继已生成（'+narr.words.length+' 个词时间戳）');
+    }catch(e1){log('中继配音失败：'+e1.message+'，尝试直连…');}
+  }
+  if(!narr){
+    try{
+      narr=await edgeTTS(text,voice,rate);
+      voiceMode='edge';
+      log('配音：Edge 直连成功');
+    }catch(e2){
+      log('Edge 直连不可用（浏览器握手限制）：'+e2.message);
+      voiceMode='none';
+      var est=text.split(/\s+/).length*0.42;
+      var s0=buildTiming(sentences,null,est);
+      return {sentences:s0,word:word,voiceMode:'none',narrDur:est,narrBlob:null,audioBuffer:null,total:INTRO_DUR+est+OUTRO_DUR};
+    }
+  }
+  var narrBuf;
+  try{ narrBuf=await decodeBlob(narr.blob); }
+  catch(e3){
+    log('音频解码失败（浏览器音频不可用）：'+e3.message+'，改用系统语音试听模式。');
+    voiceMode='none';
+    var est2=text.split(/\s+/).length*0.42;
+    var s2=buildTiming(sentences,null,est2);
+    return {sentences:s2,word:word,voiceMode:'none',narrDur:est2,narrBlob:null,audioBuffer:null,total:INTRO_DUR+est2+OUTRO_DUR};
+  }
+  narrDur=narr.duration||narrBuf.duration||0;
+  var introBuf=null;
+  try{
+    var intro=voiceMode==='relay'?await relayTTS("What's this?",voice,'+0%'):await edgeTTS("What's this?",voice,'+0%');
+    introBuf=await decodeBlob(intro.blob);
+  }catch(e){log('片头语音生成失败（仅影响片头声音）：'+e.message);}
+  var timed=buildTiming(sentences,narr.words||[],narrDur);
+  var total=INTRO_DUR+narrDur+OUTRO_DUR;
+  var ab=mixTimeline(introBuf,narrBuf,0.6,INTRO_DUR,total);
+  return {sentences:timed,word:word,voiceMode:voiceMode,narrDur:narrDur,narrBlob:narr.blob,audioBuffer:ab,total:total,introEnd:INTRO_DUR};
+}
+async function buildTimeline(sentences,word,voice,rate){
+  var relayOn=!!(SETTINGS.ttsRelay&&SETTINGS.ttsRelay.trim());
+  var ttsOne=async function(text){
+    if(relayOn){try{return await relayTTS(text,voice,rate);}catch(e1){}}
+    return await edgeTTS(text,voice,rate);
+  };
+  var mainText=(SETTINGS.introTitle||"What's this?").trim()||"What's this?";
+  var subText=(SETTINGS.introSubtitle||"Guess what this is?").trim()||"Guess what this is?";
+  var allLines=[{en:mainText,zh:'【猜猜这是什么？】'},{en:subText,zh:''}].concat(sentences);
+  var perSent=[],i;
+  for(i=0;i<allLines.length;i++){
+    var ttsText=allLines[i].en.replace(/[.,!?;:\u201C\u201D\u2018\u2019]/g,' ').replace(/\s+/g,' ').trim();
+    var res=await ttsOne(ttsText);
+    var buf=await decodeBlob(res.blob);
+    perSent.push({words:res.words||[],dur:buf.duration||res.duration||0,buf:buf});
+  }
+  var sr=perSent[0].buf.sampleRate,totalN=0;
+  for(i=0;i<perSent.length;i++)totalN+=perSent[i].dur+(i<perSent.length-1?SENT_GAP:0);
+  var out=audioCtx.createBuffer(1,Math.ceil(totalN*sr),sr);
+  var od=out.getChannelData(0),pos=0;
+  var timed=allLines.map(function(ln,si){
+    var ps=perSent[si],off=pos;
+    var sd=ps.buf.getChannelData(0),oi=Math.floor(off*sr);
+    for(var j=0;j<sd.length&&oi+j<od.length;j++)od[oi+j]+=sd[j];
+    var wlist=ps.words||[];
+    var words=wlist.map(function(w){return {text:String(w.word),start:off+w.start,end:off+w.start+w.dur};});
+    pos+=ps.dur+(si<perSent.length-1?SENT_GAP:0);
+    return {en:ln.en,zh:ln.zh||'',start:off,end:off+ps.dur,words:words};
+  });
+  var narrDur=totalN;
+  var narrWav=new Blob([bufferToWav(out)],{type:'audio/wav'});
+  log('配音：共 '+allLines.length+' 行（含主副标题），连读完成。');
+  var HOLD=3.0;var holdBuf=audioCtx.createBuffer(1,Math.ceil(HOLD*sr),sr);var ab=audioCtx.createBuffer(1,Math.ceil((narrDur+HOLD)*sr),sr);ab.getChannelData(0).set(out.getChannelData(0),0);
+  return {sentences:timed,word:word,voiceMode:relayOn?'relay':'edge',narrDur:narrDur,narrBlob:narrWav,audioBuffer:ab,total:narrDur+HOLD,introEnd:0};
+}
+/* ============ 视频渲染 ============ */
+function mkCanvas(){
+  var r=RATIOS[SETTINGS.ratio]||RATIOS['9:16'];
+  var c=document.createElement('canvas');c.width=r.w;c.height=r.h;
+  /* 挂到页面左上角小预览，真实合成尺寸，确保 captureStream 能抓到帧 */
+  c.style.cssText='position:fixed;left:0;top:0;width:90px;height:160px;pointer-events:none;z-index:99999;opacity:0.6;';
+  document.body.appendChild(c);
+  return c;
+}
+function FONT(px,weight){return (weight||700)+' '+px+'px "Baloo 2","Comic Sans MS","Chalkboard SE","Marker Felt","Trebuchet MS",sans-serif';}
+function FONTZH(px){return '500 '+px+'px "PingFang SC","Microsoft YaHei",sans-serif';}
+function roundRect(ctx,x,y,w,h,r){
+  ctx.beginPath();
+  ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);
+  ctx.closePath();
+}
+function fillText(ctx,str,x,y,font,color,strokeW){
+  ctx.font=font;ctx.textAlign='center';ctx.textBaseline='middle';
+  if(strokeW){ctx.lineJoin='round';ctx.strokeStyle='rgba(18,28,38,0.78)';ctx.lineWidth=strokeW;ctx.strokeText(str,x,y);}
+  ctx.fillStyle=color;ctx.fillText(str,x,y);
+}
+function drawSparkle(ctx,x,y,r,color){
+  ctx.fillStyle=color;ctx.beginPath();
+  ctx.moveTo(x,y-r);ctx.quadraticCurveTo(x+r*0.25,y-r*0.25,x+r,y);
+  ctx.quadraticCurveTo(x+r*0.25,y+r*0.25,x,y+r);
+  ctx.quadraticCurveTo(x-r*0.25,y+r*0.25,x-r,y);
+  ctx.quadraticCurveTo(x-r*0.25,y-r*0.25,x,y-r);
+  ctx.fill();
+}
+function drawWordBadge(ctx,word){
+  if(!word)return;
+  ctx.font=FONT(64);
+  var tw=ctx.measureText(word).width,w=tw+90,h=130,cx=540,cy=320;
+  roundRect(ctx,cx-w/2,cy-h/2,w,h,65);
+  ctx.fillStyle='rgba(255,255,255,0.93)';ctx.fill();
+  ctx.fillStyle='#0F766E';ctx.textAlign='center';ctx.textBaseline='middle';ctx.font=FONT(68);ctx.fillText(word,cx,cy+4);
+  fillText(ctx,"Today's word",cx,210,FONT(54),'rgba(255,255,255,0.95)',8);
+}
+function layoutWords(ctx,words){
+  var size=94,lineH=126,maxW=880,boxes=[],lines=[],cur=[],curW=0;
+  ctx.font=FONT(size);
+  words.forEach(function(wd,i){
+    var wdt=ctx.measureText(wd+' ').width;
+    if(cur.length&&curW+wdt>maxW){lines.push({words:cur.slice(),w:curW});cur=[];curW=0;}
+    cur.push(i);curW+=wdt;
+  });
+  if(cur.length)lines.push({words:cur.slice(),w:curW});
+  var totalH=lines.length*lineH,y0=700;
+  if(lines.length>2)y0=640;
+  lines.forEach(function(ln,li){
+    var x=540-ln.w/2,baseY=y0+li*lineH;
+    var acc=0;
+    ln.words.forEach(function(wi){
+      var wdt=ctx.measureText(words[wi]+' ').width;
+      boxes.push({text:words[wi],x:x+acc,y:baseY,w:wdt,h:size});
+      acc+=wdt;
+    });
+  });
+  return boxes;
+}
+function drawWordBox(ctx,b,state){
+  var cur=state==='cur';
+  ctx.save();
+  ctx.translate(b.x+b.w/2,b.y);
+  if(cur)ctx.scale(1.08,1.08);
+  ctx.font=FONT(94);ctx.textAlign='left';ctx.textBaseline='middle';
+  ctx.lineJoin='round';
+  if(cur){ctx.shadowColor='rgba(255,190,60,0.55)';ctx.shadowBlur=22;}
+  var color=cur?'#FFC53D':(state==='done'?'rgba(255,255,255,0.86)':'rgba(255,255,255,0.60)');
+  ctx.strokeStyle='rgba(16,26,36,0.72)';ctx.lineWidth=7;ctx.strokeText(b.text,-b.w/2,0);
+  ctx.fillStyle=color;ctx.fillText(b.text,-b.w/2,0);
+  ctx.restore();
+}
+function drawZhPanel(ctx,zh){
+  if(!zh)return;
+  ctx.font=FONTZH(56);
+  var maxW=900,lines=[],cur='';
+  zh.split('').forEach(function(ch){
+    if(ctx.measureText(cur+ch).width>maxW){lines.push(cur);cur=ch;}
+    else cur+=ch;
+  });
+  if(cur)lines.push(cur);
+  var y=1080;
+  ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.font=FONTZH(56);
+  ctx.lineJoin='round';
+  ctx.strokeStyle='rgba(16,26,36,0.85)';ctx.lineWidth=6;
+  ctx.fillStyle='rgba(255,255,255,0.95)';
+  if(lines.length===1){ctx.strokeText(lines[0],540,y);ctx.fillText(lines[0],540,y);}
+  else{ctx.strokeText(lines[0],540,y-40);ctx.fillText(lines[0],540,y-40);
+       ctx.strokeText(lines[1]||'',540,y+44);ctx.fillText(lines[1]||'',540,y+44);}
+}
+function drawProgress(ctx,TL,T){
+  var w=920,h=14,x=80,y=1830;
+  roundRect(ctx,x,y,w,h,h/2);ctx.fillStyle='rgba(255,255,255,0.35)';ctx.fill();
+  var p=Math.max(0,Math.min(1,T/Math.max(0.01,TL.narrDur)));
+  if(p>0.005){roundRect(ctx,x,y,w*p,h,h/2);ctx.fillStyle='#F2A93B';ctx.fill();}
+}
+function drawIntro(ctx,t){
+  drawSparkle(ctx,250,330,26,'rgba(255,255,255,0.85)');
+  drawSparkle(ctx,838,290,20,'rgba(255,255,255,0.8)');
+  drawSparkle(ctx,196,1120,18,'rgba(255,255,255,0.75)');
+  drawSparkle(ctx,900,1080,24,'rgba(255,255,255,0.8)');
+  fillText(ctx,SETTINGS.introTitle||"What's this?",540,830,FONT(132),'#FFFFFF',18);
+  fillText(ctx,SETTINGS.introSubtitle||'Guess what this is?',540,1010,FONTZH(54),'rgba(255,255,255,0.95)',8);
+}
+function drawOutro(ctx,TL){
+  fillText(ctx,'The End',540,790,FONT(112),'#FFFFFF',14);
+  drawWordBadge(ctx,TL.word);
+  fillText(ctx,'Great job!',540,1120,FONT(52),'rgba(255,255,255,0.95)',8);
+}
+function drawFrame(ctx,t,TL){
+  var W=ctx.canvas.width,H=ctx.canvas.height;
+  drawBg(ctx,W,H);
+  var k=Math.min(W/1080,H/1920);
+  ctx.save();
+  ctx.translate((W-1080*k)/2,(H-1920*k)/2);ctx.scale(k,k);
+  drawKaraoke(ctx,Math.min(TL.total,t),TL);
+  /* 副标题（第2行，index=1）期间，单词图盖在字幕之上 */
+  if(wordImgLoaded&&TL.sentences[1]){
+    var sub=TL.sentences[1];
+    if(t>=sub.start&&t<=sub.end+0.2){
+      var iw=700,ih=700;
+      ctx.drawImage(wordImg,540-iw/2,1050-iw/2,iw,ih);
+    }
+  }
+  ctx.restore();
+}
+function drawKaraoke(ctx,t,TL){
+  var T=t,si=TL.sentences.length-1,i;
+  for(i=0;i<TL.sentences.length;i++){if(T>=TL.sentences[i].start)si=i;else break;}
+  var s=TL.sentences[si];
+  var wi=-1;
+  for(i=0;i<s.words.length;i++){if(T>=s.words[i].start)wi=i;else break;}
+  drawWordBadge(ctx,TL.word);
+  var boxes=layoutWords(ctx,s.words.map(function(w){return w.text;}));
+  boxes.forEach(function(b,idx){
+    drawWordBox(ctx,b,idx<wi?'done':(idx===wi?'cur':'todo'));
+  });
+  drawZhPanel(ctx,s.zh);
+  drawProgress(ctx,TL,T);
+}
+/* 原生录制（captureStream + MediaRecorder） */
+function canCaptureStream(){return typeof HTMLCanvasElement!=='undefined'&&typeof HTMLCanvasElement.prototype.captureStream==='function'&&typeof MediaRecorder!=='undefined';}
+function pickMime(){
+  var c=['video/mp4;codecs=avc1.42E01E,mp4a.40.2','video/mp4','video/webm;codecs=vp9,opus','video/webm'];
+  for(var i=0;i<c.length;i++){try{if(MediaRecorder.isTypeSupported(c[i]))return c[i];}catch(e){}}
+  return '';
+}
+async function renderVideoNative(TL){
+  var canvas=mkCanvas(),ctx=canvas.getContext('2d');
+  var actx=getAudioCtx();
+  try{if(actx.state==='suspended'){await Promise.race([actx.resume(),new Promise(function(r){setTimeout(r,800);})]);}}catch(e){}
+  /* 先画一帧片头，再启动录制，确保首帧有内容 */
+  drawFrame(ctx,0,TL);
+  var stream=canvas.captureStream(30);
+  var dest=actx.createMediaStreamDestination();
+  var src=actx.createBufferSource();src.buffer=TL.audioBuffer;src.connect(dest);src.connect(actx.destination);
+  stream.addTrack(dest.stream.getAudioTracks()[0]);
+  var mime=pickMime();
+  var rec=new MediaRecorder(stream,mime?{mimeType:mime,videoBitsPerSecond:8000000,videoKeyFrameInterval:1}:undefined);
+  var chunks=[];
+  rec.ondataavailable=function(e){if(e.data&&e.data.size)chunks.push(e.data);};
+  var done=new Promise(function(res,rej){
+    rec.onstop=function(){res(new Blob(chunks,{type:mime||'video/webm'}));};
+    rec.onerror=function(e){rej(new Error('录制出错'));};
+  });
+  /* 录制前导1.5秒：先跑录制管线，再放音频 */
+  var warmup=1.5;
+  rec.start(250);
+  var watchdog=setTimeout(function(){try{rec.stop();}catch(e){}},(TL.total+20)*1000);
+  /* 用 setInterval 驱动帧（30fps），不依赖 rAF（webview 会节流 rAF 导致丢帧） */
+  var startAt=actx.currentTime+warmup;
+  src.start(startAt);
+  var timer=setInterval(function(){
+    var t=actx.currentTime-startAt;
+    if(t<0){drawFrame(ctx,0,TL);return;}
+    drawFrame(ctx,t,TL);
+    if(t>TL.total+0.2){
+      clearInterval(timer);
+      try{rec.stop();}catch(e){}
+    }
+  },33);
+  var blob=await done;
+  clearInterval(timer);
+  clearTimeout(watchdog);
+  try{src.stop();src.disconnect();}catch(e){}
+  if(blob.size<30000){throw new Error('录制画面为空（'+Math.round(blob.size/1024)+'KB）');}
+  return {blob:blob,mime:mime||'video/webm',ext:mime&&mime.indexOf('mp4')>=0?'mp4':'webm'};
+}
+/* ffmpeg.wasm 合成（iOS 兜底 / 强制 MP4） */
+async function renderVideoFfmpeg(TL,onFrame){
+  var FFm=await import('https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.10/dist/esm/index.js');
+  var Util=await import('https://cdn.jsdelivr.net/npm/@ffmpeg/util@0.12.1/dist/esm/index.js');
+  var ff=new FFm.FFmpeg();
+  ff.on('log',function(x){if(/error/i.test(x.message))log('ffmpeg: '+x.message);});
+  await ff.load({
+    workerURL:await Util.toBlobURL('https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.10/dist/esm/worker.js','text/javascript'),
+    coreURL:await Util.toBlobURL('https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/umd/ffmpeg-core.js','text/javascript'),
+    wasmURL:await Util.toBlobURL('https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/umd/ffmpeg-core.wasm','application/wasm'),
+    classWorkerURL:await Util.toBlobURL('https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.10/dist/esm/worker.js','text/javascript')
+  });
+  var fps=12,canvas=mkCanvas(),ctx=canvas.getContext('2d');
+  await ff.writeFile('a.wav',bufferToWav(TL.audioBuffer));
+  var n=Math.ceil(TL.total*fps)+1,lastLog=0;
+  for(var i=0;i<n;i++){
+    drawFrame(ctx,i/fps,TL);
+    var blob=await new Promise(function(r){canvas.toBlob(r,'image/jpeg',0.62);});
+    await ff.writeFile('f'+String(i).padStart(4,'0')+'.jpg',new Uint8Array(await blob.arrayBuffer()));
+    if(onFrame&&i-lastLog>20){lastLog=i;onFrame(i,n);}
+  }
+  if(onFrame)onFrame(n,n);
+  await ff.exec(['-framerate',String(fps),'-i','f%04d.jpg','-i','a.wav','-c:v','libx264','-preset','veryfast','-crf','23','-pix_fmt','yuv420p','-c:a','aac','-b:a','128k','-shortest','-movflags','+faststart','out.mp4']);
+  var data=await ff.readFile('out.mp4');
+  try{await ff.deleteFile('a.wav');for(var j=0;j<n;j++)await ff.deleteFile('f'+String(j).padStart(4,'0')+'.jpg');}catch(e){}
+  return {blob:new Blob([data.buffer],{type:'video/mp4'}),mime:'video/mp4',ext:'mp4'};
+}
+/* ============ 封面 ============ */
+function drawCover(ctx,word){
+  var W=ctx.canvas.width,H=ctx.canvas.height;
+  drawBg(ctx,W,H);
+  var k=Math.min(W/1080,H/1920);
+  ctx.save();
+  ctx.translate((W-1080*k)/2,(H-1920*k)/2);ctx.scale(k,k);
+  fillText(ctx,'English Story · 英语小故事',540,170,FONT(42),'rgba(255,255,255,0.96)',7);
+  fillText(ctx,"What's this?",540,720,FONT(150),'#FFFFFF',18);
+  ctx.font=FONT(60);var tw=ctx.measureText(word).width,w=tw+80,h=128;
+  roundRect(ctx,540-w/2,880,h,w,h/2);ctx.fillStyle='rgba(255,255,255,0.94)';ctx.fill();
+  ctx.fillStyle='#0F766E';ctx.textAlign='center';ctx.textBaseline='middle';ctx.font=FONT(62);ctx.fillText(word,540,948);
+  fillText(ctx,'点开视频，和我一起读',540,1330,FONTZH(46),'rgba(255,255,255,0.95)',8);
+  drawSparkle(ctx,240,1180,24,'rgba(255,255,255,0.85)');
+  drawSparkle(ctx,840,1130,20,'rgba(255,255,255,0.8)');
+  ctx.restore();
+}
+async function makeCover(word){
+  var c=mkCanvas(),ctx=c.getContext('2d');
+  drawCover(ctx,word);
+  return new Promise(function(r){c.toBlob(r,'image/png');});
+}
+/* ============ 主流程与 UI ============ */
+var STEPS=[{id:'story',name:'生成故事'},{id:'audio',name:'配音朗读'},{id:'video',name:'逐词字幕视频'}];
+var LAST={audio:null,video:null,cover:null,text:null,word:''},storyEdited=false,STORY_NOTE='';
+function log(msg){
+  var el=$('#log');if(!el)return;
+  var s=el.textContent;el.textContent=(s?s+'\n':'')+'['+new Date().toLocaleTimeString()+'] '+msg;
+  el.scrollTop=el.scrollHeight;
+}
+function setStep(id,state,msg){
+  var li=$('#step-'+id);if(!li)return;
+  li.className=state;
+  li.querySelector('.dot').innerHTML=state==='run'?'':(state==='done'?'✓':'!');
+  if(msg!==undefined)li.querySelector('.msg').textContent=msg;
+}
+function initSteps(){
+  var ol=$('#steps');ol.innerHTML='';
+  STEPS.forEach(function(s){
+    var li=document.createElement('li');li.id='step-'+s.id;
+    li.innerHTML='<span class="dot"></span><span class="st">'+s.name+'</span><span class="msg"></span>';
+    ol.appendChild(li);
+  });
+}
+function matchZh(sentences,en){
+  for(var i=0;i<sentences.length;i++)if(sentences[i].en===en)return sentences[i].zh||'';
+  return '';
+}
+function renderStoryUI(sentences,word){
+  $('#storyText').value=sentences.map(function(s){return s.en;}).join(' ');
+  var totalWords=0;sentences.forEach(function(s){totalWords+=s.en.split(/\s+/).length;});
+  $('#wordCount').textContent='共 '+sentences.length+' 句 · '+totalWords+' 词 · 目标朗读约 30 秒';
+  var zl=$('#zhList');zl.innerHTML='';
+  sentences.forEach(function(s,i){
+    var d=document.createElement('div');d.className='zh';
+    d.innerHTML='<b>'+(i+1)+'.</b> '+esc(s.en)+'　—　'+(esc(s.zh)||'（无中文翻译）');
+    zl.appendChild(d);
+  });
+  var lines=[];
+  sentences.forEach(function(s,i){lines.push((i+1)+'. '+s.en+(s.zh?('　　'+s.zh):''));});
+  $('#storyOut').textContent=lines.join('\n');
+  $('#storyCard').hidden=false;
+}
+async function runAll(){
+  var word=$('#word').value.trim().toLowerCase().replace(/\s+/g,' ');
+  if(!word && !$('#customStory').value.trim()){toast('请填写故事文案，或输入一个单词');$('#customStory').focus();return;}
+  saveSettings();
+  STORY_NOTE='';
+  initSteps();
+  $('#resultsCard').hidden=true;
+  $('#btnSpeak').style.display='none';
+  $('#goBtn').disabled=true;
+  try{
+    setStep('story','run');
+    reportDiag('run',envSnapshot());
+    var sentences;
+    if(storyEdited&&$('#storyText').value.trim()){
+      var parts=splitSentences($('#storyText').value);
+      if(parts.length)sentences=parts.map(function(en){return {en:en,zh:matchZh(lastSentences||[],en)};});
+      else throw new Error('故事文本无法解析为句子');
+    }else if($('#customStory').value.trim()){
+      var raw=$('#customStory').value.trim();
+      sentences=[];
+      if(raw.indexOf('|')>=0||raw.indexOf('｜')>=0){
+        var segs=raw.split(/[|｜]/).map(function(x){return x.trim();}).filter(Boolean);
+        for(var k=0;k<segs.length;k+=2){
+          var en=segs[k];var zh=segs[k+1]||'';
+          var ess=splitSentences(en);
+          if(ess.length>1){ess.forEach(function(e,i){sentences.push({en:e,zh:(i===0?zh:'')});});}
+          else sentences.push({en:en,zh:zh});
+        }
+      }else{
+        var lines=raw.split(/\n+/).map(function(x){return x.trim();}).filter(Boolean);
+        if(lines.length<2)lines=splitSentences(raw);
+        sentences=lines.map(function(line){
+          var i=line.indexOf('|');
+          if(i>=0)return {en:line.slice(0,i).trim(),zh:line.slice(i+1).trim()};
+          return {en:line,zh:''};
+        });
+      }
+      sentences=sentences.filter(function(s){return s.en;});
+      if(!sentences.length)throw new Error('自定义文案无法解析为句子');
+      log('使用自定义文案（'+sentences.length+' 句）');
+      STORY_NOTE='custom';
+    }else{
+      sentences=await genStory(word);
+      storyEdited=false;
+    }
+    lastSentences=sentences;
+    renderStoryUI(sentences,word);
+    var noteEl=$('#modelNotice');
+    if(STORY_NOTE==='noKey'){noteEl.hidden=false;noteEl.textContent='未配置模型 Key：当前为内置模板兜底故事（对象类词可能不合理）。建议在「设置」里填免费智谱 GLM Key（open.bigmodel.cn，1 分钟）后重新生成，或直接在上方文本框粘贴自己的文案。';}
+    else if(STORY_NOTE==='error'){noteEl.hidden=false;noteEl.textContent='模型生成失败，已用内置模板兜底（见下方日志原因）；可检查 Key/网络，或用上方自定义文案框。';}
+    else{noteEl.hidden=true;noteEl.textContent='';}
+    setStep('story','done','共 '+sentences.length+' 句');
+    setStep('audio','run');
+    var TL=await buildTimeline(sentences,word,SETTINGS.voice,SETTINGS.rate);
+    var durMsg='朗读 '+fmtSec(TL.narrDur)+'（目标约 30 秒）';
+    if(TL.narrDur>36)durMsg+=' · 偏长，可调快语速或重新生成';
+    if(TL.narrDur<18)durMsg+=' · 偏短，可调慢语速';
+    setStep('audio','done',durMsg);
+    if(TL.voiceMode==='none'){
+      setStep('video','warn','需配置配音中继（见设置）');
+      toast('已生成故事和封面；视频需配音，请设置配音中继（README 第 3 节，约 3 分钟）');
+      $('#btnSpeak').style.display='';
+      $('#audioMeta').textContent='系统语音预览（未配置配音中继，无下载文件）';
+      var tb=new Blob([$('#storyOut').textContent],{type:'text/plain;charset=utf-8'});
+      LAST={audio:null,video:null,cover:null,text:tb,word:word};
+      try{var c0=await makeCover(word);LAST.cover=c0;$('#coverImg').src=URL.createObjectURL(c0);}catch(e){log('封面失败：'+e.message);}
+      $('#resultsCard').hidden=false;
+      return;
+    }
+    var audioBlob=TL.narrBlob;
+    var audioName='story-'+word+'-audio.mp3';
+    $('#audioPlay').src=URL.createObjectURL(audioBlob);
+    $('#audioMeta').textContent=voiceLabel(TL.voiceMode)+' · 时长 '+fmtSec(TL.narrDur);
+    setStep('video','run');
+    var vres=null,videoErr='';
+    var forceMp4=SETTINGS.forceMp4||false;
+    try{
+      vres=await renderVideoNative(TL);
+    }catch(err){
+      videoErr='视频合成失败：'+err.message;
+      log(videoErr+'（其余产物不受影响）');
+      setStep('video','fail',err.message);
+    }
+    if(vres){
+      setStep('video','done',vres.ext.toUpperCase()+' · '+RATIOS[SETTINGS.ratio].w+'×'+RATIOS[SETTINGS.ratio].h+' · 片头 '+INTRO_DUR+' 秒');
+      var videoName='story-'+word+'-video.'+vres.ext;
+      var vp=$('#videoPlay');vp.src=URL.createObjectURL(vres.blob);vp.style.background='#0F1620';
+      vp.addEventListener('loadedmetadata',function(){try{vp.currentTime=0;}catch(e){}});
+      $('#videoFmtTag').textContent=vres.ext.toUpperCase();
+    }
+    var textBlob=new Blob([$('#storyOut').textContent],{type:'text/plain;charset=utf-8'});
+    LAST={audio:audioBlob,audioName:audioName,video:vres?vres.blob:null,videoName:vres?('story-'+word+'-video.'+vres.ext):null,text:textBlob,word:word};
+    $('#resultsCard').hidden=false;
+    /* 导出副标题时刻的帧作为封面图（含上传的物品图） */
+    try{
+      var c2=mkCanvas(),x2=c2.getContext('2d');
+      drawBg(x2,c2.width,c2.height);
+      var k=Math.min(c2.width/1080,c2.height/1920);
+      x2.save();x2.translate((c2.width-1080*k)/2,(c2.height-1920*k)/2);x2.scale(k,k);
+      fillText(x2,SETTINGS.introTitle||"What's this?",540,700,FONT(130),'#FFFFFF',18);
+      if(wordImgLoaded&&wordImg){
+        var iw=700,ih=700;
+        x2.drawImage(wordImg,540-iw/2,820,iw,ih);
+      }
+      x2.restore();
+      await new Promise(function(r){c2.toBlob(function(b){window.__coverBlob=b;r();},'image/png');});
+      if(window.__coverBlob){
+        var coverName='story-'+word+'-subtitle-frame.png';
+        $('#coverImg').src=URL.createObjectURL(window.__coverBlob);
+        $('#coverImg').style.display='';
+      }
+    }catch(e){log('副标题帧导出失败：'+e.message);}
+    var dlC=$('#dlCover');
+  if(dlC)dlC.addEventListener('click',function(){
+    if(!window.__coverBlob){toast('暂无封面');return;}
+    var a=document.createElement('a');a.href=URL.createObjectURL(window.__coverBlob);a.download='cover.png';a.click();
+  });
+  reportDiag('video',{ok:!!vres,err:videoErr||'',canCap:envSnapshot().canCaptureStream,forceMp4:forceMp4});
+    toast(videoErr?('已生成故事/配音/封面，视频失败：'+videoErr.replace('视频合成失败：','')):'四件套已生成');
+  }catch(e){
+    log('出错：'+e.message);
+    reportDiag('error',{message:e.message,stack:String(e&&e.stack||'').slice(0,1000)});
+    toast('生成失败：'+e.message);
+    $$('#steps li').forEach(function(li){
+      if(li.className==='run')setStep(li.id.replace('step-',''),'fail');
+    });
+  }finally{
+    $('#goBtn').disabled=false;
+  }
+}
+function voiceLabel(m){return m==='relay'?'中继 · Edge 高品质语音':(m==='edge'?'Edge 直连':'系统语音');}
+/* ============ 事件绑定 ============ */
+function bindSettings(){
+  var map={setVoice:'voice',setRate:'rate',setRatio:'ratio',setBg:'bgMode',setTtsRelay:'ttsRelay'};
+  var inputSaveIds=['setTtsRelay'];
+  Object.keys(map).forEach(function(id){
+    var el=$('#'+id);
+    if(!el)return;
+    el.value=SETTINGS[map[id]];
+    el.addEventListener('change',function(){
+      SETTINGS[map[id]]=el.value;saveSettings();
+      if(inputSaveIds.indexOf(id)>=0){
+        el.addEventListener('input',function(){SETTINGS[map[id]]=el.value;saveSettings();});
+      }
+      if(id==='setBg'){bgImg=null;bgLoaded=false;loadBg();}
+    });
+  });
+  var itEl=$('#introTitle');if(itEl){itEl.value=SETTINGS.introTitle||"What's this?";itEl.addEventListener('input',function(){SETTINGS.introTitle=itEl.value;saveSettings();});}
+  var isEl=$('#introSubtitle');if(isEl){isEl.value=SETTINGS.introSubtitle||'Guess what this is?';isEl.addEventListener('input',function(){SETTINGS.introSubtitle=isEl.value;saveSettings();});}
+  var ph=$('#promptHint');
+  if(ph)ph.addEventListener('click',function(){
+    var w=$('#phWord');
+    var word=w?w.textContent:'cup';
+    var prompt='根据'+word+'，写一个英语阅读文章。适合6岁儿童学习阅读。内容逻辑合理。需要一行一句英语，在每句英语用｜符号隔开中文翻译。';
+    navigator.clipboard.writeText(prompt).then(function(){toast('提示词已复制');}).catch(function(){toast('复制失败');});
+  });
+  var upW=$('#btnUploadWord');if(upW)upW.addEventListener('click',function(){document.getElementById('wordImgFile').click();});
+  var wf=document.getElementById('wordImgFile');
+  if(wf)wf.addEventListener('change',function(e){
+    var f=e.target.files[0];if(!f)return;
+    var r=new FileReader();
+    r.onload=function(ev){
+      var im=new Image();
+      im.onload=function(){wordImg=im;wordImgLoaded=true;toast('单词图已上传，将在副标题期间显示');};
+      im.src=String(ev.target.result);
+    };
+    r.readAsDataURL(f);
+  });
+  var upEl=$('#btnUploadBg');if(upEl)upEl.addEventListener('click',function(){document.getElementById('bgFile').click();});
+  var rbEl=$('#btnResetBg');if(rbEl)rbEl.addEventListener('click',function(){SETTINGS.customBg='';saveSettings();bgImg=null;bgLoaded=false;loadBg();toast('已恢复默认背景');});
+  var bgFileEl=document.getElementById('bgFile');
+  if(bgFileEl)bgFileEl.addEventListener('change',function(e){
+    var f=e.target.files&&e.target.files[0];if(!f)return;
+    if(f.size>5*1024*1024){toast('图片过大（>5MB），请压缩后再传');return;}
+    var r=new FileReader();
+    r.onload=function(ev){SETTINGS.customBg=String(ev.target.result);saveSettings();bgImg=null;bgLoaded=false;loadBg();toast('背景图已更换');};
+    r.readAsDataURL(f);
+  });
+  var pr=$('#setProvider');
+  if(pr){pr.value=SETTINGS.provider||'template';pr.addEventListener('change',function(){SETTINGS.provider=pr.value;saveSettings();syncLlmUI();});}
+  var lk=$('#setLlmKey');
+  if(lk){lk.addEventListener('change',function(){SETTINGS.keys[SETTINGS.provider]=lk.value;saveSettings();});}
+  var lm=$('#setLlmModel');
+  if(lm){lm.addEventListener('change',function(){SETTINGS.models[SETTINGS.provider]=lm.value;saveSettings();});}
+  var fm=$('#setForceMp4');
+  if(fm){fm.checked=!!SETTINGS.forceMp4;fm.addEventListener('change',function(){SETTINGS.forceMp4=fm.checked;saveSettings();});}
+  syncLlmUI();
+}
+var PROVIDER_INFO={
+  template:{keyLabel:'API Key（无需填写）',keyPh:'内置模板不需要 Key',modelLabel:'模型',modelPh:'内置模板不需要模型'},
+  doubao:{keyLabel:'豆包 API Key',keyPh:'火山方舟 API Key（ARK_API_KEY），开通见 README',modelLabel:'豆包模型',modelPh:'doubao-seed-1.6-flash'},
+  glm:{keyLabel:'智谱 API Key',keyPh:'智谱开放平台 API Key（bigmodel.cn 免费申请）',modelLabel:'智谱模型',modelPh:'glm-4-flash（也可换 glm-4.5-flash 等免费模型）'},
+  gemini:{keyLabel:'Gemini API Key',keyPh:'AIza...（aistudio.google.com/apikey）',modelLabel:'Gemini 模型',modelPh:'gemini-2.5-flash'}
+};
+function syncLlmUI(){
+  var p=SETTINGS.provider||'template',info=PROVIDER_INFO[p]||PROVIDER_INFO.template;
+  var kw=$('#llmKeyWrap'),mw=$('#llmModelWrap');
+  if(!kw||!mw)return;
+  var off=(p==='template');
+  kw.hidden=off;mw.hidden=off;
+  if(off)return;
+  $('#llmKeyLabel').textContent=info.keyLabel;
+  $('#llmModelLabel').textContent=info.modelLabel;
+  var lk=$('#setLlmKey'),lm=$('#setLlmModel');
+  lk.value=SETTINGS.keys[p]||'';lk.placeholder=info.keyPh;
+  lm.value=SETTINGS.models[p]||'';lm.placeholder=info.modelPh;
+}
+$('#goBtn').addEventListener('click',runAll);
+$('#regenBtn').addEventListener('click',async function(){
+  var word=$('#word').value.trim();
+  if(!word){toast('请先输入单词');return;}
+  $('#regenBtn').disabled=true;
+  try{
+    var s=await genStory(word);lastSentences=s;storyEdited=false;
+    renderStoryUI(s,word);toast('新故事已生成，点击“一键生成四件套”更新产物');
+  }catch(e){toast('生成失败：'+e.message);}
+  finally{$('#regenBtn').disabled=false;}
+});
+$('#storyText').addEventListener('input',function(){
+  storyEdited=true;
+  var raw=this.value;
+  var s;
+  if(raw.indexOf('|')>=0||raw.indexOf('｜')>=0){
+    /* 格式：EN. | ZH. EN. | ZH.  按 | 切成奇偶对 */
+    var segs=raw.split(/[|｜]/).map(function(x){return x.trim();}).filter(Boolean);
+    s=[];
+    for(var k=0;k<segs.length;k+=2){
+      var en=segs[k];var zh=segs[k+1]||'';
+      s.push({en:en,zh:zh});
+    }
+    /* 如果英文段里其实含多句，再按句拆开（中文对应空） */
+    var flat=[];
+    s.forEach(function(pair){
+      var ess=splitSentences(pair.en);
+      if(ess.length>1){ess.forEach(function(e,i){flat.push({en:e,zh:(i===0?pair.zh:'')});});}
+      else flat.push(pair);
+    });
+    s=flat;
+  }else{
+    var parts=splitSentences(raw);
+    s=parts.map(function(en){return {en:en,zh:matchZh(lastSentences||[],en)};});
+  }
+  var totalWords=0;s.forEach(function(x){totalWords+=x.en.split(/\s+/).length;});
+  $('#wordCount').textContent='（已手动编辑）'+s.length+' 句 · '+totalWords+' 词';
+  var zl=$('#zhList');zl.innerHTML='';
+  s.forEach(function(x,i){
+    var d=document.createElement('div');d.className='zh';
+    d.innerHTML='<b>'+(i+1)+'.</b> '+esc(x.en)+'　—　'+(esc(x.zh)||'<span style="color:#B0B8C0">无翻译（新增句子）</span>');
+    zl.appendChild(d);
+  });
+  $('#storyOut').textContent=s.map(function(x,i){return (i+1)+'. '+x.en+(x.zh?('　　'+x.zh):'');}).join('\n');
+});
+$('#dlAudio').addEventListener('click',function(){if(LAST.audio)download(LAST.audio,LAST.audioName);else toast('还没有音频');});
+$('#dlVideo').addEventListener('click',function(){if(LAST.video)download(LAST.video,LAST.videoName);else toast('还没有视频');});
+$('#dlText').addEventListener('click',function(){if(LAST.text)download(LAST.text,'story-'+LAST.word+'.txt');else toast('还没有故事');});
+$('#btnSpeak').addEventListener('click',async function(){
+  var txt=$('#storyOut').textContent.replace(/^\d+\.\s*/gm,'').replace(/\s+/g,' ').trim();
+  if(!txt){toast('请先生成故事');return;}
+  $('#btnSpeak').disabled=true;
+  var ok=await wsSpeak(txt,1.0);
+  $('#btnSpeak').disabled=false;
+  if(!ok)toast('系统语音不可用，建议配置 TTS 中继');
+});
+$('#word').addEventListener('keydown',function(e){if(e.key==='Enter')runAll();});
+var lastSentences=null;
+bindSettings();loadBg();
+/* 自动探测本地 TTS 中继（localhost:8899），探测到就自动填入，省去手动配置 */
+(function(){
+  if(SETTINGS.ttsRelay&&SETTINGS.ttsRelay.trim()){reportDiag('load',envSnapshot());return;}
+  var ctl=new AbortController();var tm=setTimeout(function(){ctl.abort();},1200);
+  fetch('http://localhost:8899/health',{signal:ctl.signal}).then(function(r){return r.text();}).then(function(){
+    SETTINGS.ttsRelay='http://localhost:8899';saveSettings();
+    var el=document.getElementById('setTtsRelay');if(el)el.value='http://localhost:8899';
+    toast('已自动连接本地配音中继');
+  }).catch(function(){}).finally(function(){clearTimeout(tm);reportDiag('load',envSnapshot());});
+})();
+</script>
+</body>
+</html>
