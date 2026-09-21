@@ -794,13 +794,27 @@ async function buildTimeline(sentences,word,voice,rate){
     if(res.blob){ try{ buf=await decodeBlob(res.blob); dur=buf.duration||dur; }catch(e){ log('解码失败：'+e.message); } }
     perSent.push({words:res.words||[],dur:dur||0.1,buf:buf});
   }
-  var sr=perSent[0].buf?perSent[0].buf.sampleRate:44100,totalN=0;
+  var sr=24000,totalN=0;
   for(i=0;i<perSent.length;i++)totalN+=perSent[i].dur+(i<perSent.length-1?SENT_GAP:0);
   var out=audioCtx.createBuffer(1,Math.ceil(totalN*sr),sr);
   var od=out.getChannelData(0),pos=0;
+  /* 重采样函数 */
+  function resampleTo(buf,targetSr){
+    if(!buf||buf.sampleRate===targetSr)return buf;
+    var num=Math.ceil(buf.duration*targetSr);
+    var nb=audioCtx.createBuffer(1,num,targetSr);
+    var ch=buf.getChannelData(0),oc=nb.getChannelData(0);
+    var ratio=buf.sampleRate/targetSr;
+    for(var i=0;i<num;i++){
+      var pos=i*ratio;
+      var i0=Math.floor(pos),f=pos-i0;
+      oc[i]=ch[i0]*(1-f)+(ch[i0+1]||0)*f;
+    }
+    return nb;
+  }
   var timed=allLines.map(function(ln,si){
     var ps=perSent[si],off=pos;
-    if(ps.buf){ var sd=ps.buf.getChannelData(0),oi=Math.floor(off*sr);
+    if(ps.buf){ var rb=resampleTo(ps.buf,sr); var sd=rb.getChannelData(0),oi=Math.floor(off*sr);
     for(var j=0;j<sd.length&&oi+j<od.length;j++)od[oi+j]+=sd[j]; }
     var wlist=ps.words||[];
     var words=wlist.map(function(w){return {text:String(w.word),start:off+w.start,end:off+w.start+w.dur};});
