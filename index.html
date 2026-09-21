@@ -1315,7 +1315,11 @@ window.addEventListener('unhandledrejection', function(e){
   d.textContent='PROMISE: '+(e.reason&&e.reason.message||e.reason);
   document.body.appendChild(d);
 });
-$('#goBtn').addEventListener('click',function(){ alert('按钮已点击，开始生成…'); runAll(); });
+$('#goBtn').addEventListener('click',async function(){
+  alert('1. 按钮点击');
+  try{ await runAll(); }
+  catch(e){ alert('报错: '+e.message+'\n'+e.stack); }
+});
 $('#regenBtn').addEventListener('click',async function(){
   var word=$('#word').value.trim();
   if(!word){toast('请先输入单词');return;}
