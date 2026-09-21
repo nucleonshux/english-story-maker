@@ -946,6 +946,14 @@ function drawFrame(ctx,t,TL){
   ctx.save();
   ctx.translate((W-1080*k)/2,(H-1920*k)/2);ctx.scale(k,k);
   drawKaraoke(ctx,Math.min(TL.total,t),TL);
+  /* 片头（第一句 What's this?）期间显示单词图 */
+  if(wordImgLoaded&&TL.sentences[0]){
+    var intro=TL.sentences[0];
+    if(t>=intro.start&&t<=intro.end+0.3){
+      var iw0=600,ih0=600;
+      ctx.drawImage(wordImg,540-iw0/2,1150-iw0/2,iw0,ih0);
+    }
+  }
   /* 副标题（第2行，index=1）期间，单词图盖在字幕之上 */
   if(wordImgLoaded&&TL.sentences[1]){
     var sub=TL.sentences[1];
