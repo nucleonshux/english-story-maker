@@ -586,6 +586,16 @@ function edgeTTS(text,voice,rate){
   });
 }
 /* ============ TTS：自托管中继（推荐，Edge 高品质语音 + 词级时间戳） ============ */
+/* Google Translate TTS（免费、CORS 开放、无需 Key） */
+async function gTTS(text,voice,rate){
+  var lang = voice.indexOf('en-GB')>=0 ? 'en-GB' : 'en';
+  var speed = (rate==='-10%'||rate==='-20%') ? 0.8 : 1;
+  var url = 'https://translate.google.com/translate_tts?ie=UTF-8&q=' + encodeURIComponent(text) + '&tl=' + lang + '&client=tw-ob&ttsspeed=' + speed;
+  var r = await fetch(url);
+  if(!r.ok) throw new Error('gTTS HTTP ' + r.status);
+  var blob = await r.blob();
+  return { blob: blob, words: [], duration: blob.size/16000 || 2 };
+}
 async function relayTTS(text,voice,rate){
   var base=(SETTINGS.ttsRelay||'').trim().replace(/\/+$/,'');
   if(!base)throw new Error('未配置中继地址');
@@ -753,7 +763,8 @@ async function buildTimelineLegacy(sentences,word,voice,rate){
 async function buildTimeline(sentences,word,voice,rate){
   var relayOn=!!(SETTINGS.ttsRelay&&SETTINGS.ttsRelay.trim());
   var ttsOne=async function(text){
-    if(relayOn){try{return await relayTTS(text,voice,rate);}catch(e1){}}
+    if(relayOn){try{return await relayTTS(text,voice,rate);}catch(e1){log('中继失败：'+e1.message+'，尝试 Google TTS…');}}
+    try{return await gTTS(text,voice,rate);}catch(e2){log('Google TTS 失败：'+e2.message);}
     return await edgeTTS(text,voice,rate);
   };
   var mainText=(SETTINGS.introTitle||"What's this?").trim()||"What's this?";
