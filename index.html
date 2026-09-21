@@ -1169,9 +1169,10 @@ async function runAll(){
     try{
       vres=await renderVideoNative(TL);
     }catch(err){
-      videoErr='视频合成失败：'+err.message;
-      log(videoErr+'（其余产物不受影响）');
-      setStep('video','fail',err.message);
+      videoErr='原生录制失败：'+err.message+'，尝试 ffmpeg.wasm 兜底（较慢）…';
+      log(videoErr);
+      try{ vres=await renderVideoFfmpeg(TL); }
+      catch(err2){ videoErr='视频合成失败：'+err2.message; log(videoErr); setStep('video','fail',err2.message); }
     }
     if(vres){
       setStep('video','done',vres.ext.toUpperCase()+' · '+RATIOS[SETTINGS.ratio].w+'×'+RATIOS[SETTINGS.ratio].h+' · 片头 '+INTRO_DUR+' 秒');
