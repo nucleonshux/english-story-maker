@@ -150,6 +150,7 @@ footer{font-size:12px;color:var(--muted);text-align:center;padding-top:8px}
         <label>朗读音色
           <select id="setVoice">
             <option value="en-US-AnaNeural" selected>Ana · 美音童声（默认）</option>
+            <option value="en-US-AvaMultilingualNeural">Ava · 多语言女声（活泼）</option>
             <option value="en-US-JennyNeural">Jenny · 美音女声（清晰）</option>
             <option value="en-US-AriaNeural">Aria · 美音女声</option>
             <option value="en-US-EmmaMultilingualNeural">Emma · 美音女声（多语言）</option>
@@ -543,7 +544,7 @@ function edgeTTS(text,voice,rate){
         var cfg='{"context":{"synthesis":{"audio":{"metadataoptions":{"sentenceBoundaryEnabled":"false","wordBoundaryEnabled":"true"},"outputFormat":"audio-24khz-48kbitrate-mono-mp3"}}}}';
         ws.send('X-Timestamp:'+dateStr()+'\r\nContent-Type:application/json; charset=utf-8\r\nPath:speech.config\r\n\r\n'+cfg+'\r\n');
         var rid=uuidNoDash();
-        ws.send('X-RequestId:'+rid+'\r\nContent-Type:application/ssml+xml\r\nX-Timestamp:'+dateStr()+'Z\r\nPath:ssml\r\n\r\n'+edgeSSML(text,voice,rate,'+0%','+0Hz'));
+        ws.send('X-RequestId:'+rid+'\r\nContent-Type:application/ssml+xml\r\nX-Timestamp:'+dateStr()+'Z\r\nPath:ssml\r\n\r\n'+edgeSSML(text,voice,rate,'+0%','+5Hz'));
       };
       ws.onmessage=function(ev){
         if(typeof ev.data==='string'){
