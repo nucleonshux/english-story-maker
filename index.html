@@ -1112,23 +1112,20 @@ async function runAll(){
     }else if($('#customStory').value.trim()){
       var raw=$('#customStory').value.trim();
       sentences=[];
-      if(raw.indexOf('|')>=0||raw.indexOf('｜')>=0){
-        var segs=raw.split(/[|｜]/).map(function(x){return x.trim();}).filter(Boolean);
-        for(var k=0;k<segs.length;k+=2){
-          var en=segs[k];var zh=segs[k+1]||'';
+      var lines=raw.split(/\n+/).map(function(x){return x.trim();}).filter(Boolean);
+      if(lines.length<2) lines=splitSentences(raw);
+      lines.forEach(function(line){
+        var i=line.search(/[|｜]/);
+        if(i>=0){
+          var en=line.slice(0,i).trim();
+          var zh=line.slice(i+1).trim();
           var ess=splitSentences(en);
-          if(ess.length>1){ess.forEach(function(e,i){sentences.push({en:e,zh:(i===0?zh:'')});});}
+          if(ess.length>1){ ess.forEach(function(e,idx){sentences.push({en:e,zh:(idx===0?zh:'')});}); }
           else sentences.push({en:en,zh:zh});
+        } else {
+          sentences.push({en:line,zh:''});
         }
-      }else{
-        var lines=raw.split(/\n+/).map(function(x){return x.trim();}).filter(Boolean);
-        if(lines.length<2)lines=splitSentences(raw);
-        sentences=lines.map(function(line){
-          var i=line.indexOf('|');
-          if(i>=0)return {en:line.slice(0,i).trim(),zh:line.slice(i+1).trim()};
-          return {en:line,zh:''};
-        });
-      }
+      });
       sentences=sentences.filter(function(s){return s.en;});
       if(!sentences.length)throw new Error('自定义文案无法解析为句子');
       log('使用自定义文案（'+sentences.length+' 句）');
