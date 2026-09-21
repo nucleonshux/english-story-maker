@@ -790,17 +790,18 @@ async function buildTimeline(sentences,word,voice,rate){
   for(i=0;i<allLines.length;i++){
     var ttsText=allLines[i].en.replace(/[.,!?;:\u201C\u201D\u2018\u2019]/g,' ').replace(/\s+/g,' ').trim();
     var res=await ttsOne(ttsText);
-    var buf=await decodeBlob(res.blob);
-    perSent.push({words:res.words||[],dur:buf.duration||res.duration||0,buf:buf});
+    var buf=null,dur=res.duration||0;
+    if(res.blob){ try{ buf=await decodeBlob(res.blob); dur=buf.duration||dur; }catch(e){ log('解码失败：'+e.message); } }
+    perSent.push({words:res.words||[],dur:dur||0.1,buf:buf});
   }
-  var sr=perSent[0].buf.sampleRate,totalN=0;
+  var sr=perSent[0].buf?perSent[0].buf.sampleRate:44100,totalN=0;
   for(i=0;i<perSent.length;i++)totalN+=perSent[i].dur+(i<perSent.length-1?SENT_GAP:0);
   var out=audioCtx.createBuffer(1,Math.ceil(totalN*sr),sr);
   var od=out.getChannelData(0),pos=0;
   var timed=allLines.map(function(ln,si){
     var ps=perSent[si],off=pos;
-    var sd=ps.buf.getChannelData(0),oi=Math.floor(off*sr);
-    for(var j=0;j<sd.length&&oi+j<od.length;j++)od[oi+j]+=sd[j];
+    if(ps.buf){ var sd=ps.buf.getChannelData(0),oi=Math.floor(off*sr);
+    for(var j=0;j<sd.length&&oi+j<od.length;j++)od[oi+j]+=sd[j]; }
     var wlist=ps.words||[];
     var words=wlist.map(function(w){return {text:String(w.word),start:off+w.start,end:off+w.start+w.dur};});
     pos+=ps.dur+(si<perSent.length-1?SENT_GAP:0);
