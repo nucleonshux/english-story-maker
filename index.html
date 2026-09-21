@@ -968,10 +968,11 @@ async function renderVideoNative(TL){
   try{if(actx.state==='suspended'){await Promise.race([actx.resume(),new Promise(function(r){setTimeout(r,800);})]);}}catch(e){}
   /* 先画一帧片头，再启动录制，确保首帧有内容 */
   drawFrame(ctx,0,TL);
-  var stream=canvas.captureStream(30);
+  var stream=canvas.captureStream(0);
   var dest=actx.createMediaStreamDestination();
   var src=actx.createBufferSource();src.buffer=TL.audioBuffer;src.connect(dest);src.connect(actx.destination);
   stream.addTrack(dest.stream.getAudioTracks()[0]);
+  var needRF = typeof stream.getVideoTracks()[0].requestFrame==='function';
   var mime=pickMime();
   var rec=new MediaRecorder(stream,mime?{mimeType:mime,videoBitsPerSecond:8000000,videoKeyFrameInterval:1}:undefined);
   var chunks=[];
@@ -991,6 +992,7 @@ async function renderVideoNative(TL){
     var t=actx.currentTime-startAt;
     if(t<0){drawFrame(ctx,0,TL);return;}
     drawFrame(ctx,t,TL);
+    if(needRF) try{stream.getVideoTracks()[0].requestFrame();}catch(e){}
     if(t>TL.total+0.2){
       clearInterval(timer);
       try{rec.stop();}catch(e){}
