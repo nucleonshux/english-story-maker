@@ -1104,6 +1104,8 @@ async function runAll(){
   $('#resultsCard').hidden=true;
   $('#btnSpeak').style.display='none';
   $('#goBtn').disabled=true;
+  /* iPhone Safari：必须在用户手势里 resume AudioContext */
+  try{ var ac=getAudioCtx(); if(ac.state==='suspended'){ await ac.resume(); } }catch(e){ log('AudioContext resume 失败：'+e.message); }
   try{
     setStep('story','run');
     reportDiag('run',envSnapshot());
