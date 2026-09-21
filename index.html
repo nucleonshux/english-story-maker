@@ -782,7 +782,7 @@ async function buildTimeline(sentences,word,voice,rate){
   };
   var mainText=(SETTINGS.introTitle||"What's this?").trim()||"What's this?";
   var subText=(SETTINGS.introSubtitle||"Guess what this is?").trim()||"Guess what this is?";
-  var allLines=[{en:mainText,zh:'【猜猜这是什么？】'},{en:subText,zh:''}].concat(sentences);
+  var allLines=[{en:mainText,zh:''},{en:subText,zh:''}].concat(sentences);
   var perSent=[],i;
   for(i=0;i<allLines.length;i++){
     var ttsText=allLines[i].en.replace(/[.,!?;:\u201C\u201D\u2018\u2019]/g,' ').replace(/\s+/g,' ').trim();
