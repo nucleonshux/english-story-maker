@@ -596,6 +596,21 @@ async function gTTS(text,voice,rate){
   var blob = await r.blob();
   return { blob: blob, words: [], duration: blob.size/16000 || 2 };
 }
+/* 浏览器内置语音（iPhone/iPad Safari 自带，无需网络） */
+async function sysTTS(text,voice,rate){
+  return new Promise(function(resolve,reject){
+    var u = new SpeechSynthesisUtterance(text);
+    u.lang = 'en-US'; u.rate = 1;
+    var vs = speechSynthesis.getVoices();
+    for(var i=0;i<vs.length;i++){
+      if(vs[i].lang.indexOf('en')===0 && vs[i].localService){u.voice=vs[i];break;}
+    }
+    var t0=Date.now();
+    u.onend=function(){ resolve({blob:null,words:[],duration:(Date.now()-t0)/1000}); };
+    u.onerror=function(e){ reject(new Error('sysTTS error')); };
+    speechSynthesis.speak(u);
+  });
+}
 async function relayTTS(text,voice,rate){
   var base=(SETTINGS.ttsRelay||'').trim().replace(/\/+$/,'');
   if(!base)throw new Error('未配置中继地址');
@@ -765,7 +780,8 @@ async function buildTimeline(sentences,word,voice,rate){
   var ttsOne=async function(text){
     if(relayOn){try{return await relayTTS(text,voice,rate);}catch(e1){log('中继失败：'+e1.message+'，尝试 Google TTS…');}}
     try{return await gTTS(text,voice,rate);}catch(e2){log('Google TTS 失败：'+e2.message);}
-    return await edgeTTS(text,voice,rate);
+    try{return await edgeTTS(text,voice,rate);}catch(e3){log('Edge TTS 失败：'+e3.message+'，使用系统语音…');}
+    return await sysTTS(text,voice,rate);
   };
   var mainText=(SETTINGS.introTitle||"What's this?").trim()||"What's this?";
   var subText=(SETTINGS.introSubtitle||"Guess what this is?").trim()||"Guess what this is?";
