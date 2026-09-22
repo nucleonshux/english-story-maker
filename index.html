@@ -790,7 +790,17 @@ async function buildTimeline(sentences,word,voice,rate){
     var res=await ttsOne(ttsText);
     var buf=null,dur=res.duration||0;
     if(res.blob){ try{ buf=await decodeBlob(res.blob); dur=buf.duration||dur; }catch(e){ log('解码失败：'+e.message); } }
-    perSent.push({words:res.words||[],dur:dur||0.1,buf:buf});
+    var words=res.words||[];
+    if(buf&&words.length){
+      var metaDur=words[words.length-1].start+words[words.length-1].dur;
+      if(metaDur>0.1){
+        var scale=dur/metaDur;
+        if(Math.abs(scale-1)>0.02){
+          words=words.map(function(w){return {word:w.word,start:w.start*scale,dur:w.dur*scale};});
+        }
+      }
+    }
+    perSent.push({words:words,dur:dur||0.1,buf:buf});
   }
   var sr=24000,totalN=0;
   for(i=0;i<perSent.length;i++)totalN+=perSent[i].dur+(i<perSent.length-1?SENT_GAP:0);
